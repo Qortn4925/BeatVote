@@ -6,14 +6,15 @@ import { supabase } from '@/lib/supabase';
 
 export default function Home() {
   const handleLogin = async () => {
+    const origin = window.location.origin;
     await supabase.auth.signInWithOAuth({
       provider: 'spotify',
       options: {
-        redirectTo: `${window.location.origin}/host/dashboard`,
+        redirectTo: `${origin}/host/dashboard`,
       },
     });
   };
-  console.log(`${window.location.origin}/dashboard`);
+ 
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
