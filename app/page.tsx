@@ -9,10 +9,11 @@ export default function Home() {
     await supabase.auth.signInWithOAuth({
       provider: 'spotify',
       options: {
-        redirectTo: 'http://localhost:3000',
+        redirectTo: `${window.location.origin}/host/dashboard`,
       },
     });
   };
+  console.log(`${window.location.origin}/dashboard`);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
