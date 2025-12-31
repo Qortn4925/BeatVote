@@ -12,14 +12,12 @@ export default function DashBoardLayout({
 
     const createRoom =async()=>{
         const { data: { user } } = await supabase.auth.getUser();
-            console.log(user ,"user");
         if(!user) {
             alert("loginneeds");
             return;
         }
         const roomCode = Math.random().toString(36).substring(2,8).toUpperCase();
-            console.log("room",roomCode);
-        // supabase 저장
+        // supabase ����옣
         const {data,error} = await supabase
         .from('rooms')
         .insert([
@@ -34,8 +32,8 @@ export default function DashBoardLayout({
             return;
         }
         if(data) {
-            // TODO 방 관리 어케할지생각하기
-            // router.push(`/room/${roomCode}`);
+          const newRoomCode=data[0].room_code;
+            router.push(`/host/dashboard/${newRoomCode}`);
         }
     }
 
@@ -44,7 +42,7 @@ export default function DashBoardLayout({
       <aside className="w-64 bg-white border-r flex flex-col">
         <div className="p-4 font-bold text-xl border-b">BeatVote</div>
         <div className="flex-1 overflow-y-auto">
-          <button className="w-full p-4 text-left hover:bg-gray-100" onClick={createRoom}>+ 새 방 만들기</button>
+          <button className="w-full p-4 text-left hover:bg-gray-100" onClick={createRoom}>+ 방 만들기</button>
         </div>
       </aside>
 
