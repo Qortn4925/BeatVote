@@ -13,6 +13,7 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
     const [spotifyToken,setSpotifyToken]=useState("");
     const [isHost,setIsHost]=useState(false);
     const [deviceId,setDeviceId] =useState("");
+
     // uuid값 db에서 검색해 state로 관리
     const getRoomUUID= async () => {
       const {data:roomData,error:roomErrot} = await supabase
@@ -25,9 +26,9 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
 
     // PlayList 테이블에서 정보 받아오기
      const refreshPlaylist =  async () => { 
-         const {data} =await supabase.from('playlist').select('*').eq('room_id', roomId).order('votes_count',{ascending: false});
-         if(data) setPlayList(data);
-         console.log(data,"data");
+        console.log(roomId,"roomId");
+         const watingTrackList =await playlistService.getWaitingTrackList(roomId);
+         if(watingTrackList) setPlayList(watingTrackList);
      };
     // 실행 순서 보장과 ,렌더링 방지를 위한 useEffect 쪼개기 
      useEffect(()=> {
@@ -75,6 +76,7 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
         console.error("네트워크 에러",error);
       }
      }
+     
      const handleTrackEnd = async (roomId:string) => {
       try{
           const nextTrack =await playlistService.getTopVotedTrack(roomId);
@@ -87,11 +89,32 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
         }
      }
 
+    const syncPlayBack = async () => {
+    if(!deviceId) return;
+    // 재생 상태 확인
+    const {isPlaying} = await playlistService.getPlayBackContext(roomId);
+      if (isPlaying) return;
+      // 재생중인곡 없으면 투표수 높은거
+      const nextTrack= await playlistService.getTopVotedTrack(roomId);
+
+      if(nextTrack) {
+        await playTrack(spotifyToken,deviceId,nextTrack.trackUri);
+        await playlistService.updateStatus(nextTrack.id,'playing');
+      }    
+  }
+
+  const handleMusicnAdded = async () => {
+    
+    console.log("실행확인");
+    await refreshPlaylist();
+
+    await syncPlayBack();
+  }
 
    return (
     <div>
       <SpotifyPlayer token={spotifyToken} setDeviceId={setDeviceId} onTrackEnd={()=>handleTrackEnd(roomId)}/>
-      <SearchBar roomId={roomId} onMusicAdded={refreshPlaylist}/>
+      <SearchBar roomId={roomId} onMusicAdded={handleMusicnAdded}/>
       <CurrentTrack/>
       <PlayList playList={playList}/>
   

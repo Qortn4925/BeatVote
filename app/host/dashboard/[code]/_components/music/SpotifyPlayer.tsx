@@ -47,7 +47,6 @@ export default function SpotifyPlayer({token ,setDeviceId,onTrackEnd}:{token:str
 
       // 기기 준비
       newPlayer.addListener('player_state_changed',(state:any)=> {
-        console.log(state,"이벤트 상태 감지 리스너");
         if(!state) return;
         setIsPaused(state.paused);
         if(state.pasued && state.position === 0 && state.track_window_previous_tracks.length >0){

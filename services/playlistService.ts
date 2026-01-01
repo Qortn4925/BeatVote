@@ -3,6 +3,31 @@ import { supabase } from "@/lib/supabase";
 export const playlistService= {
 
 
+  async addTrack (params) {
+    return await supabase
+    .from('playlist')
+    .insert(params)
+    .select()
+    .single();
+  },
+
+ async getWaitingTrackList(roomId:string)  {
+  const {data,error} =await supabase.from('playlist').select('*').eq('room_id', roomId).order('votes_count',{ascending: false});
+    if(error) throw error;
+  return data || [];
+ },
+
+async getPlayBackContext(roomId:string){
+  const {data:playing} = await supabase
+  .from('playlist')
+  .select('id')
+  .eq('room_id',roomId)
+  .eq('status','playing')
+  .maybeSingle();
+  
+  return  {isPlaying: !playing};
+},
+
 // 곡 상태 업데이트
  async updateStatus(trackId: string, status: 'waiting' | 'playing' | 'finished') {
     const { error } = await supabase
