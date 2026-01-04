@@ -12,7 +12,7 @@ export const playlistService= {
   },
 
  async getWaitingTrackList(roomId:string)  {
-  const {data,error} =await supabase.from('playlist').select('*').eq('room_id', roomId).order('votes_count',{ascending: false});
+  const {data,error} =await supabase.from('playlist').select('*').eq('room_id', roomId).eq('status','waiting').order('votes_count',{ascending: false});
     if(error) throw error;
   return data || [];
  },
@@ -20,12 +20,11 @@ export const playlistService= {
 async getPlayBackContext(roomId:string){
   const {data:playing} = await supabase
   .from('playlist')
-  .select('id')
+  .select('status')
   .eq('room_id',roomId)
   .eq('status','playing')
   .maybeSingle();
-  
-  return  {isPlaying: !playing};
+  return  {isPlaying: !!playing};
 },
 
 // 곡 상태 업데이트
@@ -41,7 +40,7 @@ async getPlayBackContext(roomId:string){
   async getTopVotedTrack(roomId: string) {
     console.log("실행 확인");
       const {data:nextTrack,error} =await supabase
-        .from('playList')
+        .from('playlist')
         .select('*')
         .eq('room_id',roomId)
         .eq('status','waiting')

@@ -26,7 +26,6 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
 
     // PlayList 테이블에서 정보 받아오기
      const refreshPlaylist =  async () => { 
-        console.log(roomId,"roomId");
          const watingTrackList =await playlistService.getWaitingTrackList(roomId);
          if(watingTrackList) setPlayList(watingTrackList);
      };
@@ -89,26 +88,28 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
         }
      }
 
-    const syncPlayBack = async () => {
+    const syncPlayBack = async (newAddTrack?:any) => {
     if(!deviceId) return;
     // 재생 상태 확인
     const {isPlaying} = await playlistService.getPlayBackContext(roomId);
       if (isPlaying) return;
       // 재생중인곡 없으면 투표수 높은거
-      const nextTrack= await playlistService.getTopVotedTrack(roomId);
+      let nextTrack= await playlistService.getTopVotedTrack(roomId);
 
+        if(!nextTrack &&newAddTrack){
+          nextTrack=newAddTrack;
+        }
       if(nextTrack) {
-        await playTrack(spotifyToken,deviceId,nextTrack.trackUri);
+        await playTrack(spotifyToken,deviceId,nextTrack.track_uri);
         await playlistService.updateStatus(nextTrack.id,'playing');
-      }    
+         await refreshPlaylist();
+      } 
   }
 
-  const handleMusicnAdded = async () => {
-    
-    console.log("실행확인");
+  const handleMusicnAdded = async (newTrack:any) => {
     await refreshPlaylist();
 
-    await syncPlayBack();
+    await syncPlayBack(newTrack);
   }
 
    return (

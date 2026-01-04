@@ -6,12 +6,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function PlayList({playList}:{playList:Array<any>}) {
-    console.log(playList,"플레이리스트");
 
 
     return <div className="flex flex-col h-full space-y-4">
       <div className="flex items-center justify-between px-2">
-        <h3 className="text-sm font-semibold text-muted-foreground">Next in Queue</h3>
+        <h3 className="text-sm font-semibold text-muted-foreground">투표 리스트</h3>
         <Badge variant="secondary">{playList.length} Tracks</Badge>
       </div>
 
