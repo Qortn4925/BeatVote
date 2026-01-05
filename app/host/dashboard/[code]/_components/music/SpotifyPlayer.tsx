@@ -23,7 +23,7 @@ export default function SpotifyPlayer({token ,setDeviceId,onTrackEnd}:{token:str
        // 2. SDK 로드 완료 시 실행될 콜백 정의
     window.onSpotifyWebPlaybackSDKReady = () => {
       const newPlayer = new window.Spotify.Player({
-        name: 'Spotify Player', // Spotify 앱에 표시될 이름
+        name: 'Spotify Player',
         getOAuthToken: (cb: any) => { cb(token); },
         volume: 0.5
       });
@@ -47,6 +47,7 @@ export default function SpotifyPlayer({token ,setDeviceId,onTrackEnd}:{token:str
 
       // 기기 준비
       newPlayer.addListener('player_state_changed',(state:any)=> {
+        console.log("호출 확인, 노래끝나는거 감지");
         if(!state) return;
         setIsPaused(state.paused);
         if(state.pasued && state.position === 0 && state.track_window_previous_tracks.length >0){
@@ -62,7 +63,7 @@ export default function SpotifyPlayer({token ,setDeviceId,onTrackEnd}:{token:str
 
     return (
     <div className="p-4 bg-gray-900 text-white rounded-xl mt-4"> 
-     뭘봐
+    
    
     </div>
   );

@@ -17,10 +17,15 @@ export const playlistService= {
   return data || [];
  },
 
+ async getPlayingTrack(roomId:string){
+    const{data,error} =await supabase.from('playlist').select('*').eq('room_id',roomId).eq('status','playing').maybeSingle();
+    return data;
+ },
+
 async getPlayBackContext(roomId:string){
   const {data:playing} = await supabase
   .from('playlist')
-  .select('status')
+  .select('*')
   .eq('room_id',roomId)
   .eq('status','playing')
   .maybeSingle();
@@ -28,11 +33,13 @@ async getPlayBackContext(roomId:string){
 },
 
 // 곡 상태 업데이트
- async updateStatus(trackId: string, status: 'waiting' | 'playing' | 'finished') {
+ async updateStatus(roomId: string, status: 'waiting' | 'playing' | 'finished') {
+  console.log("이거 실행여부 확인");
     const { error } = await supabase
       .from('playlist')
       .update({ status })
-      .eq('id', trackId);
+      .eq('room_id',roomId)
+      .eq('status','playing');
 
     if (error) throw error;
   },

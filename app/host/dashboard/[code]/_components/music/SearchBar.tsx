@@ -16,7 +16,7 @@ export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusi
         const { data:{session}} =await supabase.auth.getSession();
         const spotifyToken=session?.provider_token;
         if(!spotifyToken){
-            console.error("spotify 占쎈꽅占쎄쿃 x");
+            console.error("spotify 토큰오류 x");
             return;
         }
         try{
@@ -62,7 +62,7 @@ export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusi
 
     return( 
       <div className="p-6 flex flex-col h-full bg-white">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">�끂�옒 寃��깋�븯湲�</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">노래 검색하기</h2>
 
       {/* 野껓옙占쎄퉳筌∽옙 占쎌겫占쎈열 */}
       <div className="relative mb-8">
@@ -73,7 +73,7 @@ export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusi
           placeholder="�끂�옒"
           className="w-full p-4 pl-12 bg-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
         />
-        <span className="absolute left-4 top-4 text-gray-400">寃��깋�븯湲�</span>
+        <span className="absolute left-4 top-4 text-gray-400"></span>
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-3">
@@ -91,14 +91,14 @@ export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusi
 
             <button className="opacity-0 group-hover:opacity-100 bg-green-500 text-white px-4 py-2 rounded-full text-sm font-medium transition-all hover:bg-green-600"
             onClick={()=> handleAddTrack(track.id,track.name,track.artist,track.albumArt,track.uri)}>
-              寃��깋�븯湲�
+              추가
               </button>
             </div>
         ))}
       </div>
       
       <div className="mt-6 pt-6 border-t border-gray-100">
-        <p className="text-sm font-semibold text-gray-400">�쁽�옱 吏꾪뻾以묒씤 �듃�옓</p>
+        <p className="text-sm font-semibold text-gray-400"></p>
       </div>
     </div>
       )

@@ -13,6 +13,7 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
     const [spotifyToken,setSpotifyToken]=useState("");
     const [isHost,setIsHost]=useState(false);
     const [deviceId,setDeviceId] =useState("");
+    const [playingTrack,setPlayingTrack]=useState<any>(null);
 
     // uuid값 db에서 검색해 state로 관리
     const getRoomUUID= async () => {
@@ -24,11 +25,7 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
       if(roomData)  setRoomId(roomData.id);
   }
 
-    // PlayList 테이블에서 정보 받아오기
-     const refreshPlaylist =  async () => { 
-         const watingTrackList =await playlistService.getWaitingTrackList(roomId);
-         if(watingTrackList) setPlayList(watingTrackList);
-     };
+   
     // 실행 순서 보장과 ,렌더링 방지를 위한 useEffect 쪼개기 
      useEffect(()=> {
       getRoomUUID();
@@ -37,7 +34,7 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
 
      useEffect(()=>{
       if(roomId){
-        refreshPlaylist();
+       syncRoomState();
       }
      },[roomId])
      
@@ -77,15 +74,9 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
      }
      
      const handleTrackEnd = async (roomId:string) => {
-      try{
-          const nextTrack =await playlistService.getTopVotedTrack(roomId);
-          console.log(nextTrack,"값 확인")
-          if(nextTrack){
-            // await playTrack(spotifyToken,deviceId,)
-          }
-        }catch(error) {
-          console.log(error);
-        }
+      console.log("트랙 끝나는거 확인");
+      syncPlayBack();
+      syncRoomState();
      }
 
     const syncPlayBack = async (newAddTrack?:any) => {
@@ -93,6 +84,9 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
     // 재생 상태 확인
     const {isPlaying} = await playlistService.getPlayBackContext(roomId);
       if (isPlaying) return;
+      
+      //이 밑은 곡이 종료가 보장된 시점에 실행
+      await playlistService.updateStatus(roomId,'finished');
       // 재생중인곡 없으면 투표수 높은거
       let nextTrack= await playlistService.getTopVotedTrack(roomId);
 
@@ -101,22 +95,32 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
         }
       if(nextTrack) {
         await playTrack(spotifyToken,deviceId,nextTrack.track_uri);
-        await playlistService.updateStatus(nextTrack.id,'playing');
-         await refreshPlaylist();
+        await playlistService.updateStatus(roomId,'playing');
+        //  await refreshPlaylist();
       } 
   }
 
   const handleMusicnAdded = async (newTrack:any) => {
-    await refreshPlaylist();
-
     await syncPlayBack(newTrack);
+
+    await syncRoomState();
+
+  }
+  // 방 상태를 결정관리하는 함수
+  const syncRoomState= async()=>{
+    const [waitingList,playingTrack]= await Promise.all([
+      playlistService.getWaitingTrackList(roomId),
+      playlistService.getPlayingTrack(roomId)
+    ]);
+    setPlayingTrack(playingTrack);
+    setPlayList(waitingList);
   }
 
    return (
     <div>
       <SpotifyPlayer token={spotifyToken} setDeviceId={setDeviceId} onTrackEnd={()=>handleTrackEnd(roomId)}/>
       <SearchBar roomId={roomId} onMusicAdded={handleMusicnAdded}/>
-      <CurrentTrack/>
+      <CurrentTrack playingTrack={playingTrack}/>
       <PlayList playList={playList}/>
   
     </div>
