@@ -35,9 +35,9 @@ export const spotifyService={
     async pause(token:string,deviceId:string){
         console.log("pause, 실행 확인");
         console.log("pause," ,token, deviceId);
-        if(token || deviceId) return;
+        if(!token || !deviceId) return;
         const url=BASE_URL+`pause?device_id=${deviceId}`;
-      const {response,error}= await fetch( url,
+      const {data,error}= await fetch( url,
         {
             method: 'PUT',
             headers:{
@@ -46,7 +46,7 @@ export const spotifyService={
         }
        );
 
-       console.log(response,"정지 실행");
+       console.log(data,"정지 실행");
     },
 
 }

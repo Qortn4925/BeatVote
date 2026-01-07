@@ -20,9 +20,8 @@ interface CurrentTrackProps {
 }
 
  export  default function CurrentTrack({playingTrack,onPause,isPaused ,onPlay}:CurrentTrackProps) {
-
+        console.log("현재 isPasued",isPaused);
         const handlePlayControl=()=>{
-            console.log(isPaused ,"정지?");
             //정지중일때
             if(isPaused){
                 onPlay(playingTrack?.track_uri);
