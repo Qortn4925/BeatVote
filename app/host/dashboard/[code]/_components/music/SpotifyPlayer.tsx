@@ -40,14 +40,13 @@ export default function SpotifyPlayer({token ,setDeviceId,onTrackEnd}:{token:str
         },
         body: JSON.stringify({
           device_ids: [device_id],
-          play: false, // true로 하면 가져오자마자 재생, false는 준비만 함
+          play: false, 
         }),
       });
     });
 
       // 기기 준비
       newPlayer.addListener('player_state_changed',(state:any)=> {
-        console.log("호출 확인, 노래끝나는거 감지");
         if(!state) return;
         setIsPaused(state.paused);
         if(state.pasued && state.position === 0 && state.track_window_previous_tracks.length >0){

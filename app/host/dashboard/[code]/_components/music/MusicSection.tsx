@@ -6,6 +6,7 @@ import CurrentTrack from "./CurrentTrack";
 import SpotifyPlayer from "./SpotifyPlayer";
 import { json } from "stream/consumers";
 import { playlistService } from "@/services/playlistService";
+import { spotifyService } from "@/services/spotifyService";
 
 export default function MusicSection({roomCode}:{ roomCode: string} ) {
     const [playList,setPlayList]=useState<any[]>([]);
@@ -14,6 +15,8 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
     const [isHost,setIsHost]=useState(false);
     const [deviceId,setDeviceId] =useState("");
     const [playingTrack,setPlayingTrack]=useState<any>(null);
+        const[isPaused,setIsPaused]=useState(false);
+
 
     // uuid값 db에서 검색해 state로 관리
     const getRoomUUID= async () => {
@@ -34,7 +37,7 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
 
      useEffect(()=>{
       if(roomId){
-       syncRoomState();
+        syncPlayBack();
       }
      },[roomId])
      
@@ -48,45 +51,30 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
 
 
      // 노래 재생시키는 함수
-     const playTrack = async (spotifyToken,deviceId,trackUri) => {
-      try {
-        const response = await fetch (
-          `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,{
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${spotifyToken}`,
-            },
-            body:JSON.stringify({
-              uris:[trackUri]
-            }),
-          }
-        );
-        if(response.ok) {
-          console.log("새 노래 재생 시작");
-        }else {
-          const errorData= await response.json();
-          console.error("재생 실패 원인" ,errorData);
-        }
-      }catch (error) {
-        console.error("네트워크 에러",error);
-      }
+     const playTrack = async (trackUri:string) => {
+      if(trackUri) return;
+      
+      spotifyService.play(spotifyToken,deviceId,trackUri);
+      setIsPaused(!isPaused);
      }
+    
      
      const handleTrackEnd = async (roomId:string) => {
-      console.log("트랙 끝나는거 확인");
-      syncPlayBack();
-      syncRoomState();
+
+      // 노래 종료시 ,검색후 상태 업데이트
+        const currentTrack = await playlistService.getPlayingTrack(roomId);
+      if (currentTrack) {
+       await playlistService.updateStatus(roomId,currentTrack.id,'finished');
+      }
+      // 다음 노래 찾아서 틀기
+      await syncPlayBack();
      }
 
     const syncPlayBack = async (newAddTrack?:any) => {
     if(!deviceId) return;
     // 재생 상태 확인
-    const {isPlaying} = await playlistService.getPlayBackContext(roomId);
-      if (isPlaying) return;
-      
-      //이 밑은 곡이 종료가 보장된 시점에 실행
-      await playlistService.updateStatus(roomId,'finished');
+    const currentTrack = await playlistService.getPlayingTrack(roomId);
+      if (currentTrack) return;
       // 재생중인곡 없으면 투표수 높은거
       let nextTrack= await playlistService.getTopVotedTrack(roomId);
 
@@ -94,17 +82,15 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
           nextTrack=newAddTrack;
         }
       if(nextTrack) {
-        await playTrack(spotifyToken,deviceId,nextTrack.track_uri);
-        await playlistService.updateStatus(roomId,'playing');
-        //  await refreshPlaylist();
+        await playTrack(nextTrack.track_uri);
+        await playlistService.updateStatus(roomId,nextTrack.id,'playing');
+        await syncRoomState();
       } 
   }
 
   const handleMusicnAdded = async (newTrack:any) => {
     await syncPlayBack(newTrack);
-
     await syncRoomState();
-
   }
   // 방 상태를 결정관리하는 함수
   const syncRoomState= async()=>{
@@ -116,12 +102,18 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
     setPlayList(waitingList);
   }
 
+  const handlePause = async ()=>{
+    console.log("실행 확인")
+    await spotifyService.pause(spotifyToken,deviceId);
+    setIsPaused(!isPaused);
+  }
+
    return (
     <div>
       <SpotifyPlayer token={spotifyToken} setDeviceId={setDeviceId} onTrackEnd={()=>handleTrackEnd(roomId)}/>
       <SearchBar roomId={roomId} onMusicAdded={handleMusicnAdded}/>
-      <CurrentTrack playingTrack={playingTrack}/>
-      <PlayList playList={playList}/>
+      <CurrentTrack playingTrack={playingTrack} isPaused={isPaused} onPause={handlePause} onPlay={playTrack}/>
+      <PlayList playList={playList} />
   
     </div>
   );

@@ -7,6 +7,9 @@ import { useState } from "react";
 
 
 interface CurrentTrackProps {
+    isPaused:boolean,
+    onPause:()=>void,
+    onPlay:(traciUri:string)=>void,
     playingTrack:{
         id:string;
         track_name: string;
@@ -16,18 +19,18 @@ interface CurrentTrackProps {
     }|null;
 }
 
- export  default function CurrentTrack({playingTrack}:CurrentTrackProps) {
+ export  default function CurrentTrack({playingTrack,onPause,isPaused ,onPlay}:CurrentTrackProps) {
 
-        const[istPlaying,setIsPlaying]=useState(false);
-
-        const handlePlayBack=()=>{
-            // 실행중이면
-            if(istPlaying){
-                //정지 함수
+        const handlePlayControl=()=>{
+            console.log(isPaused ,"정지?");
+            //정지중일때
+            if(isPaused){
+                onPlay(playingTrack?.track_uri);
             }
-            //실행함수
-
-            setIsPlaying(!istPlaying);
+            //실행중일때
+            else{
+                onPause();
+            }
         }
     
     if(!playingTrack) {
@@ -55,11 +58,11 @@ interface CurrentTrackProps {
                         variant="ghost" 
                         size="icon"
                         className="h-10 w-10 rounded-full hover:scale-105 transition-transform" 
-                        onClick={handlePlayBack}> {
-                            istPlaying? (
-                                <Pause className="h-6 w-6 fill-current" />
+                        onClick={handlePlayControl}> {
+                            isPaused? (
+                              <Play className="h-6 w-6 fill-current ml-1" />
                             ):(
-                            <Play className="h-6 w-6 fill-current ml-1" />
+                                <Pause className="h-6 w-6 fill-current" />
                             )
                             }</Button>
                         </div>

@@ -1,14 +1,26 @@
 import { supabase } from "@/lib/supabase";
+import { UUID } from "crypto";
 
 export const playlistService= {
 
 
-  async addTrack (params) {
-    return await supabase
-    .from('playlist')
-    .insert(params)
-    .select()
-    .single();
+  async addTrack (roomId:string,trackId:string,trackName:string,artist:string,albumArt:string,trackUri:string) {
+      const {data,error} = await supabase.from('playlist').
+            insert({
+            room_id:roomId,
+            track_id:trackId,
+            track_name:trackName,
+            artist_name:artist,
+            album_art:albumArt,
+            track_uri:trackUri,
+              }).select()
+              .single();
+
+              if(error) {
+                console.error("곡 추가중 에러", error.message);
+              }
+
+              return data;
   },
 
  async getWaitingTrackList(roomId:string)  {
@@ -19,29 +31,29 @@ export const playlistService= {
 
  async getPlayingTrack(roomId:string){
     const{data,error} =await supabase.from('playlist').select('*').eq('room_id',roomId).eq('status','playing').maybeSingle();
+
+  if (error) {
+    console.error("재생 곡 조회 중 에러:", error.message);
+    return null;
+  }
+
     return data;
  },
 
-async getPlayBackContext(roomId:string){
-  const {data:playing} = await supabase
-  .from('playlist')
-  .select('*')
-  .eq('room_id',roomId)
-  .eq('status','playing')
-  .maybeSingle();
-  return  {isPlaying: !!playing};
-},
 
 // 곡 상태 업데이트
- async updateStatus(roomId: string, status: 'waiting' | 'playing' | 'finished') {
+ async updateStatus(roomId: string,id:UUID, status: 'waiting' | 'playing' | 'finished') {
   console.log("이거 실행여부 확인");
     const { error } = await supabase
       .from('playlist')
-      .update({ status })
+      .update({ status:status })
       .eq('room_id',roomId)
-      .eq('status','playing');
+      .eq('id',id);
 
-    if (error) throw error;
+    if (error) {
+      console.error("업데이트 오류 ㅜ ㅜ ",  error.message);
+    };
+    
   },
 //  투표 1위 곡 가져오기 (다음 곡 선정을 위해)
   async getTopVotedTrack(roomId: string) {

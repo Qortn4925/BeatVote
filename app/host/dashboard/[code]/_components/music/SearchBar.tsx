@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { playlistService } from "@/services/playlistService";
 
-export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusicAdded:() => void} ) {
+export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusicAdded:(track:any) => void} ) {
     const [searchQuery,setSearchQuery] =useState('');
     const [searchList,setSearchList] =useState<any[]>([]);
  
@@ -38,7 +38,7 @@ export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusi
         }));
         setSearchList(tracks);
         }catch(error){
-            console.error("野껓옙占쎄퉳 餓ο옙 占쎈퓠占쎌쑎 獄쏆뮇源�",error);
+            console.error("error",error);
         }
     }
 
@@ -48,15 +48,10 @@ export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusi
 
   const handleAddTrack=async (trackId,trackName,artist,albumArt,trackUri)=>{
     // room_id, track_id,track_name,artist_name , album_art , trackUri
-     const {error} =await supabase.from('playlist').insert({
-        room_id:roomId,
-        track_id:trackId,
-        track_name:trackName,
-        artist_name:artist,
-        album_art:albumArt,
-        track_uri:trackUri,
-     })
-     onMusicAdded();
+     const track = await playlistService.addTrack(roomId,trackId,trackName,artist,albumArt,trackUri);
+     if(track){
+     onMusicAdded(track);
+     }
   }
 
 
@@ -64,7 +59,6 @@ export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusi
       <div className="p-6 flex flex-col h-full bg-white">
       <h2 className="text-2xl font-bold mb-6 text-gray-800">노래 검색하기</h2>
 
-      {/* 野껓옙占쎄퉳筌∽옙 占쎌겫占쎈열 */}
       <div className="relative mb-8">
         <input
           type="text"
