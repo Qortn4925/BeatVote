@@ -8,6 +8,9 @@ import { json } from "stream/consumers";
 import { playlistService } from "@/services/playlistService";
 import { spotifyService } from "@/services/spotifyService";
 import { useSpotifyPlayer } from "@/hooks/useSpotifyPlayer";
+import { roomService } from "@/services/roomServices";
+import { Button } from "@/components/ui/button";
+import { UUID } from "crypto";
 
 export default function MusicSection({roomCode}:{ roomCode: string} ) {
     const [playList,setPlayList]=useState<any[]>([]);
@@ -17,15 +20,13 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
     const [deviceId,setDeviceId] =useState("");
     const [playingTrack,setPlayingTrack]=useState<any>(null);
     const[isPaused,setIsPaused]=useState(true);
-
-    // uuid값 db에서 검색해 state로 관리
-        const getRoomUUID= async () => {
-          const {data:roomData,error:roomErrot} = await supabase
-        .from('rooms')
-        .select('id')
-        .eq('room_code',roomCode)
-        .single();
-          if(roomData)  setRoomId(roomData.id);
+    const [position,setPosition]=useState(0);
+    const [duration,setDuration]= useState(0);
+    const [isTransitioning, setIsTransitioning] = useState(false);
+     
+        const getRoomId= async () => {
+        const roomId= await roomService.getRoomId(roomCode);
+          if(roomId)  setRoomId(roomId);
        }
 
 
@@ -49,12 +50,15 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
         const handleTrackEnd = async (roomId:string) => {
 
           // 노래 종료시 ,검색후 상태 업데이트
-            const currentTrack = await playlistService.getPlayingTrack(roomId);
+          const currentTrack = await playlistService.getPlayingTrack(roomId);
           if (currentTrack) {
           await playlistService.updateStatus(roomId,currentTrack.id,'finished');
           }
           // 다음 노래 찾아서 틀기
           await syncPlayBack();
+
+          // 재생 상태
+           setIsPaused(!isPaused); 
         }
 
         const syncPlayBack = async (newAddTrack?:any) => {
@@ -74,7 +78,7 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
             await syncRoomState();
           } 
        }
-
+       // 음악 추가시 
         const handleMusicAdded = async (newTrack:any) => {
         await syncPlayBack(newTrack);
         await syncRoomState();
@@ -91,13 +95,33 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
 
         const handlePause = async ()=>{
         console.log("실행 확인")
-        await spotifyService.pause(spotifyToken,deviceId);
+        player.pause();
+        // await spotifyService.pause(spotifyToken,deviceId);
         setIsPaused(!isPaused);
         }
 
+        const handleResume= ()=>{
+          if(player) {
+            player.resume();
+            setIsPaused(!isPaused);
+          }
+        }
+        const handleVoteTrack= async (id:UUID)=>{
+          setPlayList((prev)=>
+          prev.map(item=>
+            item.id===id
+            ?{... item,votes_count: item.votes_count +1}
+            : item
+          ).sort((a,b)=> b.votes_count -a.votes_count)
+          );
+          const error=  playlistService.updateVotedTrack(id);
+
+        }
+
+        const {player,isPlayerPaused} = useSpotifyPlayer({token:spotifyToken,setDeviceId,setPosition,setDuration,onTrackEnd:()=>handleTrackEnd(roomId)});
     // 실행 순서 보장과 ,렌더링 방지를 위한 useEffect 쪼개기 
      useEffect(()=> {
-      getRoomUUID();
+      getRoomId();
       fetchHostToken();
      },[roomCode])
 
@@ -106,18 +130,37 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
         syncPlayBack();
       }
      },[roomId])
+    
+     // 타이머
+     useEffect(()=>{
+      let timer:NodeJS.Timeout;
+      if(!isPaused &&player){
+
+
+        timer=setInterval(()=>{
+          setPosition((prev)=>{
+          const currentPos=prev+1000;
+         
+             if(duration>0 && (duration-currentPos)<1500){
+              console.log("노래 끝나는거 감지 함수.");
+              handleTrackEnd(roomId);
+              clearInterval(timer);
+             }
+             return currentPos;
+        });
+        },1000);
+      }
+      return () =>{
+        if(timer) clearInterval(timer);
+      }
+     },[isPaused,player,duration]);
      
-
-    const {player} = useSpotifyPlayer({token:spotifyToken,setDeviceId,onTrackEnd:()=>handleTrackEnd(roomId)});
-
-
    return (
     <div>
-      {/* <SpotifyPlayer token={spotifyToken} setDeviceId={setDeviceId} onTrackEnd={()=>handleTrackEnd(roomId)}/> */}
+      <Button onClick={()=>{setPosition(duration-5000)}}> 노래 종료</Button>
       <SearchBar roomId={roomId} onMusicAdded={handleMusicAdded}/>
-      <CurrentTrack playingTrack={playingTrack} isPaused={isPaused} onPause={handlePause} onPlay={playTrack}/>
-      <PlayList playList={playList} />
-  
+      <CurrentTrack playingTrack={playingTrack} isPaused={isPaused} onPause={handlePause} onPlay={playTrack} onResume={handleResume} duration={duration} position={position}/>
+      <PlayList playList={playList}  onVoted={handleVoteTrack}/>
     </div>
   );
 }

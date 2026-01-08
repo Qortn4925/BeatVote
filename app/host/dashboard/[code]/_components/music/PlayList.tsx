@@ -5,7 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 
-export default function PlayList({playList}:{playList:Array<any>}) {
+
+interface PlayListProps {
+  playList: any[]; 
+  onVoted: (trackId: string) => void;
+}
+
+export default function PlayList({playList , onVoted}:PlayListProps) {
 
 
     return <div className="flex flex-col h-full space-y-4">
@@ -43,6 +49,7 @@ export default function PlayList({playList}:{playList:Array<any>}) {
                     variant="ghost" 
                     size="icon" 
                     className="h-8 w-8 hover:bg-primary/20 hover:text-primary"
+                    onClick={()=>onVoted(track.id)}
                   >
                     <ChevronUp className="h-5 w-5" />
                   </Button>

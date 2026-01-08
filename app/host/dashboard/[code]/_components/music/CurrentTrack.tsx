@@ -3,13 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Pause, Play } from "lucide-react";
-import { useState } from "react";
 
 
 interface CurrentTrackProps {
     isPaused:boolean,
     onPause:()=>void,
     onPlay:(traciUri:string)=>void,
+    onResume:()=>void,
+    position:number,
+    duration:number,
     playingTrack:{
         id:string;
         track_name: string;
@@ -19,22 +21,29 @@ interface CurrentTrackProps {
     }|null;
 }
 
- export  default function CurrentTrack({playingTrack,onPause,isPaused ,onPlay}:CurrentTrackProps) {
-        console.log("현재 isPasued",isPaused);
+ export  default function CurrentTrack({playingTrack,onPause,isPaused ,onPlay,onResume,position,duration}:CurrentTrackProps) {
         const handlePlayControl=()=>{
             //정지중일때
             if(isPaused){
-                onPlay(playingTrack?.track_uri);
+                onResume();
             }
             //실행중일때
             else{
                 onPause();
             }
         }
-    
+      const formatTime = (ms: number) => {
+        const seconds = Math.floor((ms / 1000) % 60);
+        const minutes = Math.floor((ms / (1000 * 60)) % 60);
+        return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+         };
+
+         const progress=duration>0?(position/duration)*100:0;
+
     if(!playingTrack) {
         return <div> 재생중인곡 x</div>
     }
+  
     
     return  (<Card className="overflow-hidden border-none bg-gradient-to-br from-secondary/40 to-background shadow-lg">
                 <CardContent className="p-4">
@@ -47,10 +56,10 @@ interface CurrentTrackProps {
                             <p className="text-sm text-muted-foreground">{playingTrack.artist_name}</p>
                         </div>
                         <div className="w-full space-y-1">
-                            <Progress value={33} className="h-1"/>
+                            <Progress value={progress} className="h-1"/>
                             <div className="flex justify-between text-[10px] text-muted-foreground">
-                                <span>0:00</span>
-                                <span>3:45</span>
+                                <span>{formatTime(position)}</span>
+                                <span>{formatTime(duration)}</span>
                             </div>
                         </div>
                         <Button

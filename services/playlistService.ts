@@ -30,12 +30,12 @@ export const playlistService= {
  },
 
  async getPlayingTrack(roomId:string){
-    const{data,error} =await supabase.from('playlist').select('*').eq('room_id',roomId).eq('status','playing').maybeSingle();
+      const{data,error} =await supabase.from('playlist').select('*').eq('room_id',roomId).eq('status','playing').maybeSingle();
 
-  if (error) {
-    console.error("재생 곡 조회 중 에러:", error.message);
-    return null;
-  }
+    if (error) {
+      console.error("재생 곡 조회 중 에러:", error.message);
+      return null;
+    }
 
     return data;
  },
@@ -72,5 +72,16 @@ export const playlistService= {
         }
         console.log(nextTrack,"nextTrack");
     return nextTrack;
+  },
+
+  async updateVotedTrack(id:UUID){
+     const {error}= await supabase.rpc('increment_vote',{
+      playlist_id:id
+     })
+
+     if(error) {console.log(error.message,"곡 업데이트 오류")
+      return error;
+     };
+     
   }
 };
