@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { UUID } from "crypto";
+import { subscribe } from "diagnostics_channel";
 
 export const playlistService= {
 
@@ -74,14 +75,36 @@ export const playlistService= {
     return nextTrack;
   },
 
-  async updateVotedTrack(id:UUID){
-     const {error}= await supabase.rpc('increment_vote',{
-      playlist_id:id
+  // 투표 후 tracklist 재반환.
+  async voteTrackAndGetList(id:UUID ,roomId:UUID){
+     const {data,error}= await supabase.rpc('handle_track_vote',{
+      playlist_id:id,
+      p_room_id:roomId
      })
-
+     console.log(data,"곡 추가시 데이터 값");
      if(error) {console.log(error.message,"곡 업데이트 오류")
       return error;
      };
+
+     return data;
      
+  },
+
+  async subscribeToPlaylist(roomId:UUID, onUpdate:()=>void){
+    return supabase
+    .channel(`room-${roomId}`)
+    .on(
+      'postgres_changes',
+      {
+        event:'*',
+        schema:'public',
+        table:'playlist',
+        filter:`room_id=eq.${roomId}`
+      },
+      ()=>{
+        onUpdate();
+      }
+    )
+    .subscribe();
   }
 };

@@ -3,8 +3,6 @@ import SearchBar from "./SearchBar";
 import { supabase } from "@/lib/supabase";
 import PlayList from "./PlayList";
 import CurrentTrack from "./CurrentTrack";
-import SpotifyPlayer from "./SpotifyPlayer";
-import { json } from "stream/consumers";
 import { playlistService } from "@/services/playlistService";
 import { spotifyService } from "@/services/spotifyService";
 import { useSpotifyPlayer } from "@/hooks/useSpotifyPlayer";
@@ -107,15 +105,10 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
           }
         }
         const handleVoteTrack= async (id:UUID)=>{
-          setPlayList((prev)=>
-          prev.map(item=>
-            item.id===id
-            ?{... item,votes_count: item.votes_count +1}
-            : item
-          ).sort((a,b)=> b.votes_count -a.votes_count)
-          );
-          const error=  playlistService.updateVotedTrack(id);
-
+        
+            const updatedList=await playlistService.voteTrackAndGetList(id,roomId);
+            setPlayList(updatedList);
+          
         }
 
         const {player,isPlayerPaused} = useSpotifyPlayer({token:spotifyToken,setDeviceId,setPosition,setDuration,onTrackEnd:()=>handleTrackEnd(roomId)});
@@ -128,6 +121,12 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
      useEffect(()=>{
       if(roomId){
         syncPlayBack();
+        syncRoomState();
+        const channel = playlistService.subscribeToPlaylist(roomId,syncRoomState);
+        
+        return ()=> {
+          supabase.removeChannel(channel);
+        }
       }
      },[roomId])
     
