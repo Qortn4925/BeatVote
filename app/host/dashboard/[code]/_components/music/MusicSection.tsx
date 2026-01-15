@@ -9,6 +9,7 @@ import { useSpotifyPlayer } from "@/hooks/useSpotifyPlayer";
 import { roomService } from "@/services/roomServices";
 import { Button } from "@/components/ui/button";
 import { UUID } from "crypto";
+import { votesService } from "@/services/votesService";
 
 export default function MusicSection({roomCode}:{ roomCode: string} ) {
     const [playList,setPlayList]=useState<any[]>([]);
@@ -21,6 +22,8 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
     const [position,setPosition]=useState(0);
     const [duration,setDuration]= useState(0);
     const [isTransitioning, setIsTransitioning] = useState(false);
+    const [userId,setUserId]=useState<string |null>(null);
+    const [myVotes,setMyVotes]= useState<string[]>([]);
      
         const getRoomId= async () => {
         const roomId= await roomService.getRoomId(roomCode);
@@ -30,10 +33,17 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
 
         const fetchHostToken=async()=>{
           const {data:{session}} = await supabase.auth.getSession();
+          // 호스트 
           if(session?.provider_token){
             setSpotifyToken(session.provider_token);
+            setUserId(session.user.id);
             setIsHost(true);
+          }//게스트 토큰
+          else{
+            setUserId(getOrCreateGuestId());
           }
+            console.log(userId, "유저아읻 확인");
+          
         }
 
         // 노래 재생시키는 함수
@@ -51,13 +61,18 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
           const currentTrack = await playlistService.getPlayingTrack(roomId);
           if (currentTrack) {
           await playlistService.updateStatus(roomId,currentTrack.id,'finished');
+          await votesService.deleteVotes(currentTrack.id);
+          setMyVotes(prev=>prev.filter(id=>id!==currentTrack.id));
           }
           // 다음 노래 찾아서 틀기
           await syncPlayBack();
 
-          // 재생 상태
-           setIsPaused(!isPaused); 
         }
+
+
+        // 이거 데이터에 따라서  track.tracksURI냐  track.uri냐 따져야함./
+
+
 
         const syncPlayBack = async (newAddTrack?:any) => {
         if(!deviceId) return;
@@ -70,8 +85,10 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
             if(!nextTrack &&newAddTrack){
               nextTrack=newAddTrack;
             }
+            console.log(newAddTrack,"new ");
+            console.log(nextTrack,"데이터 가져오는거");
           if(nextTrack) {
-            await playTrack(nextTrack.track_uri);
+            await playTrack(nextTrack.tracks.uri);
             await playlistService.updateStatus(roomId,nextTrack.id,'playing');
             await syncRoomState();
           } 
@@ -105,11 +122,25 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
           }
         }
         const handleVoteTrack= async (id:UUID)=>{
-        
-            const updatedList=await playlistService.voteTrackAndGetList(id,roomId);
+            
+          if(myVotes.includes(id)){
+            alert("이미 투표한 곡입니다.");
+            return ;
+          }
+            const updatedList=await playlistService.voteTrackAndGetList(id,roomId,userId);
             setPlayList(updatedList);
-          
+            setMyVotes(prev=>[...prev,id]);
+    
         }
+        const getOrCreateGuestId= () =>{
+            let guestId=localStorage.getItem('guest_id');
+            if(!guestId){
+              guestId=`guest_${crypto.randomUUID()}`;
+              localStorage.setItem('guest_id',guestId);
+            }
+            return guestId;
+        }
+
 
         const {player,isPlayerPaused} = useSpotifyPlayer({token:spotifyToken,setDeviceId,setPosition,setDuration,onTrackEnd:()=>handleTrackEnd(roomId)});
     // 실행 순서 보장과 ,렌더링 방지를 위한 useEffect 쪼개기 
@@ -122,6 +153,7 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
       if(roomId){
         syncPlayBack();
         syncRoomState();
+        // 투표 감지
         const channel = playlistService.subscribeToPlaylist(roomId,syncRoomState);
         
         return ()=> {
@@ -159,7 +191,7 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
       <Button onClick={()=>{setPosition(duration-5000)}}> 노래 종료</Button>
       <SearchBar roomId={roomId} onMusicAdded={handleMusicAdded}/>
       <CurrentTrack playingTrack={playingTrack} isPaused={isPaused} onPause={handlePause} onPlay={playTrack} onResume={handleResume} duration={duration} position={position}/>
-      <PlayList playList={playList}  onVoted={handleVoteTrack}/>
+      <PlayList playList={playList} myVotes={myVotes} onVoted={handleVoteTrack}/>
     </div>
   );
 }

@@ -8,10 +8,11 @@ import { Card, CardContent } from "@/components/ui/card";
 
 interface PlayListProps {
   playList: any[]; 
+  myVotes: string[];
   onVoted: (trackId: string) => void;
 }
 
-export default function PlayList({playList , onVoted}:PlayListProps) {
+export default function PlayList({playList,myVotes , onVoted}:PlayListProps) {
 
 
     return <div className="flex flex-col h-full space-y-4">
@@ -32,15 +33,15 @@ export default function PlayList({playList , onVoted}:PlayListProps) {
 
                 {/* 앨범 아트 */}
                 <img 
-                  src={track.album_art} 
-                  alt={track.track_name} 
+                  src={track.tracks.album_art} 
+                  alt={track.tracks.name} 
                   className="w-12 h-12 rounded-md object-cover shadow-sm"
                 />
 
                 {/* 곡 정보 */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{track.track_name}</p>
-                  <p className="text-xs text-muted-foreground truncate">{track.artist_name}</p>
+                  <p className="text-sm font-medium truncate">{track.tracks.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{track.tracks.artist}</p>
                 </div>
 
                 {/* 투표 섹션 */}
@@ -49,6 +50,7 @@ export default function PlayList({playList , onVoted}:PlayListProps) {
                     variant="ghost" 
                     size="icon" 
                     className="h-8 w-8 hover:bg-primary/20 hover:text-primary"
+                    disabled={myVotes.includes(track.id)}
                     onClick={()=>onVoted(track.id)}
                   >
                     <ChevronUp className="h-5 w-5" />

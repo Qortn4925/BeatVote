@@ -4,6 +4,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Pause, Play } from "lucide-react";
 
+interface TrackMaster{
+    id:string;
+    name:string;
+    artist:string;
+    album_art:string;
+    uri:string;
+}
 
 interface CurrentTrackProps {
     isPaused:boolean,
@@ -14,10 +21,8 @@ interface CurrentTrackProps {
     duration:number,
     playingTrack:{
         id:string;
-        track_name: string;
-        artist_name: string;
-        album_art:string;
-        track_uri: string;
+        room_id:string;
+        tracks:TrackMaster;
     }|null;
 }
 
@@ -49,11 +54,11 @@ interface CurrentTrackProps {
                 <CardContent className="p-4">
                             {/* 앨범 아트 */}
                     <div className="flex flex-col items-center space-y-4">
-                        <img src={playingTrack.album_art}/>
+                        <img src={playingTrack.tracks.album_art}/>
                     
                         <div className="w-full text-center">
-                            <h2 className="line-clamp-1 text-lg font-bold">{playingTrack.track_name}</h2>
-                            <p className="text-sm text-muted-foreground">{playingTrack.artist_name}</p>
+                            <h2 className="line-clamp-1 text-lg font-bold">{playingTrack.tracks.name}</h2>
+                            <p className="text-sm text-muted-foreground">{playingTrack.tracks.artist}</p>
                         </div>
                         <div className="w-full space-y-1">
                             <Progress value={progress} className="h-1"/>

@@ -48,9 +48,10 @@ export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusi
 
   const handleAddTrack=async (trackId,trackName,artist,albumArt,trackUri)=>{
     // room_id, track_id,track_name,artist_name , album_art , trackUri
-     const track = await playlistService.addTrack(roomId,trackId,trackName,artist,albumArt,trackUri);
-     if(track){
-     onMusicAdded(track);
+     const {track,isDuplicate} = await playlistService.addTrack(roomId,trackId,trackName,artist,albumArt,trackUri);
+     console.log(track.tracks,"핸들 애드 트랙,");
+     if(track && !isDuplicate){
+       onMusicAdded(track);
      }
   }
 
@@ -64,7 +65,7 @@ export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusi
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value) }
-          placeholder="�끂�옒"
+          placeholder="검색"
           className="w-full p-4 pl-12 bg-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
         />
         <span className="absolute left-4 top-4 text-gray-400"></span>

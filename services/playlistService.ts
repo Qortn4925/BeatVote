@@ -6,32 +6,77 @@ export const playlistService= {
 
 
   async addTrack (roomId:string,trackId:string,trackName:string,artist:string,albumArt:string,trackUri:string) {
-      const {data,error} = await supabase.from('playlist').
+        // 1.노래 추가시 마스터 테이블에 등록되어있는지 확인.
+        const {error:trackError} =await supabase
+            .from('tracks')
+            .upsert({
+              id:trackId,
+              name:trackName,
+              artist:artist,
+              album_art:albumArt,
+              uri:trackUri
+            });
+
+            if(trackError) throw trackError;
+            
+            // 2. 현재 방에 'waiting', 또는 'playing' 중인지 확인
+            const {data:existing} = await supabase
+            .from('playlist')
+            .select('id')
+            .eq('room_id',roomId)
+            .eq('track_id',trackId)
+            .in('status',['waiting','playing'])
+            .maybeSingle();
+            if(existing) return {isDuplicate:true};
+            //3. playlist 데이터 넣기.
+            const {data:track,error} =await supabase
+            .from('playlist').
             insert({
             room_id:roomId,
             track_id:trackId,
-            track_name:trackName,
-            artist_name:artist,
-            album_art:albumArt,
-            track_uri:trackUri,
-              }).select()
+              }).select(`
+                *,
+                tracks(*)
+                `)
               .single();
-
               if(error) {
                 console.error("곡 추가중 에러", error.message);
+                throw error;
               }
-
-              return data;
+              return {track,isDuplicate:false};
   },
 
  async getWaitingTrackList(roomId:string)  {
-  const {data,error} =await supabase.from('playlist').select('*').eq('room_id', roomId).eq('status','waiting').order('votes_count',{ascending: false});
+  const {data,error} =await supabase
+        .from('playlist')
+        .select(`*,
+          tracks(
+          name,
+          artist,
+          album_art,
+          uri
+          )
+        `)
+        .eq('room_id', roomId)
+        .eq('status','waiting')
+        .order('votes_count',{ascending: false});
     if(error) throw error;
   return data || [];
  },
 
  async getPlayingTrack(roomId:string){
-      const{data,error} =await supabase.from('playlist').select('*').eq('room_id',roomId).eq('status','playing').maybeSingle();
+      const{data,error} =await supabase
+          .from('playlist')
+          .select(`*,
+            tracks (
+            name,
+            artist,
+            album_art,
+            uri)
+            `)
+          .eq('room_id',roomId)
+          .eq('status','playing')
+          .maybeSingle();
 
     if (error) {
       console.error("재생 곡 조회 중 에러:", error.message);
@@ -61,7 +106,13 @@ export const playlistService= {
     console.log("실행 확인");
       const {data:nextTrack,error} =await supabase
         .from('playlist')
-        .select('*')
+        .select(`*,
+           tracks (
+            name,
+            artist,
+            album_art,
+            uri)
+            `)
         .eq('room_id',roomId)
         .eq('status','waiting')
         .order('votes_count',{ascending:false})
@@ -76,10 +127,11 @@ export const playlistService= {
   },
 
   // 투표 후 tracklist 재반환.
-  async voteTrackAndGetList(id:UUID ,roomId:UUID){
+  async voteTrackAndGetList(id:UUID ,roomId:UUID , userId:UUID){
      const {data,error}= await supabase.rpc('handle_track_vote',{
-      playlist_id:id,
-      p_room_id:roomId
+      p_playlist_id:id,
+      p_room_id:roomId,
+      p_user_id:userId
      })
      console.log(data,"곡 추가시 데이터 값");
      if(error) {console.log(error.message,"곡 업데이트 오류")
