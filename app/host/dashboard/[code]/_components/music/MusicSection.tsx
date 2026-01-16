@@ -110,8 +110,8 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
 
         const handlePause = async ()=>{
         console.log("실행 확인")
+        console.log(player,"플레이어 상태")
         player.pause();
-        // await spotifyService.pause(spotifyToken,deviceId);
         setIsPaused(!isPaused);
         }
 
@@ -142,7 +142,7 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
         }
 
 
-        const {player,isPlayerPaused} = useSpotifyPlayer({token:spotifyToken,setDeviceId,setPosition,setDuration,onTrackEnd:()=>handleTrackEnd(roomId)});
+        const {player,isPlayerPaused} = useSpotifyPlayer({token:spotifyToken,setDeviceId,setPosition,setDuration});
     // 실행 순서 보장과 ,렌더링 방지를 위한 useEffect 쪼개기 
      useEffect(()=> {
       getRoomId();
@@ -166,14 +166,10 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
      useEffect(()=>{
       let timer:NodeJS.Timeout;
       if(!isPaused &&player){
-
-
         timer=setInterval(()=>{
           setPosition((prev)=>{
           const currentPos=prev+1000;
-         
              if(duration>0 && (duration-currentPos)<1500){
-              console.log("노래 끝나는거 감지 함수.");
               handleTrackEnd(roomId);
               clearInterval(timer);
              }

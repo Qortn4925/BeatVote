@@ -144,7 +144,7 @@ export const playlistService= {
 
   async subscribeToPlaylist(roomId:UUID, onUpdate:()=>void){
     return supabase
-    .channel(`room-${roomId}`)
+    .channel(`rooms-${roomId}`)
     .on(
       'postgres_changes',
       {

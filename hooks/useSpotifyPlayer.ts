@@ -13,11 +13,11 @@ interface UseSpotifyPlayerProps{
     setPosition:(pos:number)=>void,
     setDuration:(dur:number)=>void,
     setDeviceId:(deviceId:string)=>void,
-    onTrackEnd:()=>void,
+   
 }
 
 
-export const useSpotifyPlayer =({token ,setDeviceId,onTrackEnd ,setDuration,setPosition}:UseSpotifyPlayerProps)=>{
+export const useSpotifyPlayer =({token ,setDeviceId,setDuration,setPosition}:UseSpotifyPlayerProps)=>{
     const [player, setPlayer] = useState<any>(null);
     const [isPlayerPaused, setIsPlayerPaused] = useState(true);
   
