@@ -13,13 +13,12 @@ interface UseSpotifyPlayerProps{
     setPosition:(pos:number)=>void,
     setDuration:(dur:number)=>void,
     setDeviceId:(deviceId:string)=>void,
-   
+    setIsPaused:(ispaused:boolean)=>void,
 }
 
 
-export const useSpotifyPlayer =({token ,setDeviceId,setDuration,setPosition}:UseSpotifyPlayerProps)=>{
+export const useSpotifyPlayer =({token ,setDeviceId,setDuration,setPosition,setIsPaused}:UseSpotifyPlayerProps)=>{
     const [player, setPlayer] = useState<any>(null);
-    const [isPlayerPaused, setIsPlayerPaused] = useState(true);
   
       useEffect(()=> {
         //1 스크립트 로드
@@ -54,7 +53,7 @@ export const useSpotifyPlayer =({token ,setDeviceId,setDuration,setPosition}:Use
       // 기기 준비
       newPlayer.addListener('player_state_changed',(state:any)=> {
         if(!state) return;
-        setIsPlayerPaused(state.paused);
+        setIsPaused(state.pasued);
         setPosition(state.position);
         setDuration(state.duration);
       });
@@ -66,6 +65,6 @@ export const useSpotifyPlayer =({token ,setDeviceId,setDuration,setPosition}:Use
        }; 
     },[token]);
     
-    return {player,isPlayerPaused};
+    return player;
 }
 

@@ -52,7 +52,7 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
           if(!trackUri) return;
           
           spotifyService.play(spotifyToken,deviceId,trackUri);
-          setIsPaused(!isPaused);
+          
         }
         
         const handleTrackEnd = async (roomId:string) => {
@@ -108,19 +108,7 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
         setPlayList(waitingList);
         }
 
-        const handlePause = async ()=>{
-        console.log("실행 확인")
-        console.log(player,"플레이어 상태")
-        player.pause();
-        setIsPaused(!isPaused);
-        }
 
-        const handleResume= ()=>{
-          if(player) {
-            player.resume();
-            setIsPaused(!isPaused);
-          }
-        }
         const handleVoteTrack= async (id:UUID)=>{
             
           if(myVotes.includes(id)){
@@ -140,9 +128,25 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
             }
             return guestId;
         }
+        const handlePause = async ()=>{
+        console.log("실행 확인")
+        console.log(player,"플레이어 상태")
+        player.pause();
+        }
 
+        const handleResume= async()=>{
+          if(player) {
+            player.resume();
+          }
+        }
 
-        const {player,isPlayerPaused} = useSpotifyPlayer({token:spotifyToken,setDeviceId,setPosition,setDuration});
+        const handlePlayerControl= async()=>{
+            if(player){
+              await player.togglePlay();
+            }
+        }
+
+        const player = useSpotifyPlayer({token:spotifyToken,setDeviceId,setPosition,setDuration ,setIsPaused});
     // 실행 순서 보장과 ,렌더링 방지를 위한 useEffect 쪼개기 
      useEffect(()=> {
       getRoomId();
@@ -182,11 +186,12 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
       }
      },[isPaused,player,duration]);
      
+        
    return (
     <div>
       <Button onClick={()=>{setPosition(duration-5000)}}> 노래 종료</Button>
       <SearchBar roomId={roomId} onMusicAdded={handleMusicAdded}/>
-      <CurrentTrack playingTrack={playingTrack} isPaused={isPaused} onPause={handlePause} onPlay={playTrack} onResume={handleResume} duration={duration} position={position}/>
+      <CurrentTrack playingTrack={playingTrack} isPaused={isPaused} onTogglePlay={handlePlayerControl} onPause={handlePause}  onPlay={playTrack} onResume={handleResume} duration={duration} position={position}/>
       <PlayList playList={playList} myVotes={myVotes} onVoted={handleVoteTrack}/>
     </div>
   );

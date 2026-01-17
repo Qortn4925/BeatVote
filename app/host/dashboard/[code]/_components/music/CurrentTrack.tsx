@@ -17,6 +17,7 @@ interface CurrentTrackProps {
     onPause:()=>void,
     onPlay:(traciUri:string)=>void,
     onResume:()=>void,
+    onTogglePlay:()=>void,
     position:number,
     duration:number,
     playingTrack:{
@@ -26,17 +27,17 @@ interface CurrentTrackProps {
     }|null;
 }
 
- export  default function CurrentTrack({playingTrack,onPause,isPaused ,onPlay,onResume,position,duration}:CurrentTrackProps) {
-        const handlePlayControl=()=>{
-            //정지중일때
-            if(isPaused){
-                onResume();
-            }
-            //실행중일때
-            else{
-                onPause();
-            }
-        }
+ export  default function CurrentTrack({playingTrack,onPause,isPaused ,onTogglePlay ,onPlay,onResume,position,duration}:CurrentTrackProps) {
+        // const handlePlayControl=()=>{
+        //     //정지중일때
+        //     if(isPaused){
+        //         onResume();
+        //     }
+        //     //실행중일때
+        //     else{
+        //         onPause();
+        //     }
+        // }
       const formatTime = (ms: number) => {
         const seconds = Math.floor((ms / 1000) % 60);
         const minutes = Math.floor((ms / (1000 * 60)) % 60);
@@ -71,7 +72,7 @@ interface CurrentTrackProps {
                         variant="ghost" 
                         size="icon"
                         className="h-10 w-10 rounded-full hover:scale-105 transition-transform" 
-                        onClick={handlePlayControl}> {
+                        onClick={onTogglePlay}> {
                             isPaused? (
                               <Play className="h-6 w-6 fill-current ml-1" />
                             ):(
