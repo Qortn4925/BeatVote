@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 import { supabase } from '@/lib/supabase';
+import { access } from "fs";
 
 export default function Home() {
   const handleLogin = async () => {
@@ -10,6 +11,11 @@ export default function Home() {
     await supabase.auth.signInWithOAuth({
       provider: 'spotify',
       options: {
+        scopes: 'user-read-email user-read-private user-library-read user-modify-playback-state streaming user-read-playback-state',
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
         redirectTo: `${origin}/host/dashboard`,
       },
     });
