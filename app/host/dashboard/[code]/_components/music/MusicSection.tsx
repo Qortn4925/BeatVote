@@ -67,12 +67,6 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
           await syncPlayBack();
 
         }
-
-
-        // 이거 데이터에 따라서  track.tracksURI냐  track.uri냐 따져야함./
-
-
-
         const syncPlayBack = async (newAddTrack?:any) => {
         if(!deviceId) return;
         // 재생 상태 확인
