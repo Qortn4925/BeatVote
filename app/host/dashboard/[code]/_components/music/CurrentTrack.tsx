@@ -14,9 +14,6 @@ interface TrackMaster{
 
 interface CurrentTrackProps {
     isPaused:boolean,
-    onPause:()=>void,
-    onPlay:(traciUri:string)=>void,
-    onResume:()=>void,
     onTogglePlay:()=>void,
     position:number,
     duration:number,
@@ -27,17 +24,8 @@ interface CurrentTrackProps {
     }|null;
 }
 
- export  default function CurrentTrack({playingTrack,onPause,isPaused ,onTogglePlay ,onPlay,onResume,position,duration}:CurrentTrackProps) {
-        // const handlePlayControl=()=>{
-        //     //정지중일때
-        //     if(isPaused){
-        //         onResume();
-        //     }
-        //     //실행중일때
-        //     else{
-        //         onPause();
-        //     }
-        // }
+ export  default function CurrentTrack({playingTrack,isPaused ,onTogglePlay ,position,duration}:CurrentTrackProps) {
+     
       const formatTime = (ms: number) => {
         const seconds = Math.floor((ms / 1000) % 60);
         const minutes = Math.floor((ms / (1000 * 60)) % 60);
@@ -45,6 +33,7 @@ interface CurrentTrackProps {
          };
 
          const progress=duration>0?(position/duration)*100:0;
+
 
     if(!playingTrack) {
         return <div> 재생중인곡 x</div>

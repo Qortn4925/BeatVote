@@ -21,7 +21,6 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
     const[isPaused,setIsPaused]=useState(true);
     const [position,setPosition]=useState(0);
     const [duration,setDuration]= useState(0);
-    const [isTransitioning, setIsTransitioning] = useState(false);
     const [userId,setUserId]=useState<string |null>(null);
     const [myVotes,setMyVotes]= useState<string[]>([]);
      
@@ -128,22 +127,20 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
             }
             return guestId;
         }
-        const handlePause = async ()=>{
-        console.log("실행 확인")
-        console.log(player,"플레이어 상태")
-        player.pause();
-        }
-
-        const handleResume= async()=>{
-          if(player) {
-            player.resume();
-          }
-        }
-
+     
         const handlePlayerControl= async()=>{
-            if(player){
-              await player.togglePlay();
-            }
+          if(!player) return;
+          
+          //비동기 오류...
+            setTimeout(async ()=> {
+              if(typeof player.togglePlay ==='function'){
+                try {
+                  await player.togglePlay();
+                }catch (e){
+                  console.error("재생 제어 실패", e);
+                }
+              }
+            },50);
         }
 
         const player = useSpotifyPlayer({token:spotifyToken,setDeviceId,setPosition,setDuration ,setIsPaused});
@@ -191,7 +188,7 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
     <div>
       <Button onClick={()=>{setPosition(duration-5000)}}> 노래 종료</Button>
       <SearchBar roomId={roomId} onMusicAdded={handleMusicAdded}/>
-      <CurrentTrack playingTrack={playingTrack} isPaused={isPaused} onTogglePlay={handlePlayerControl} onPause={handlePause}  onPlay={playTrack} onResume={handleResume} duration={duration} position={position}/>
+      <CurrentTrack playingTrack={playingTrack} isPaused={isPaused} onTogglePlay={handlePlayerControl}    duration={duration} position={position}/>
       <PlayList playList={playList} myVotes={myVotes} onVoted={handleVoteTrack}/>
     </div>
   );

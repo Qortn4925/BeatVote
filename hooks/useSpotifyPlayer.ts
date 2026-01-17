@@ -53,7 +53,7 @@ export const useSpotifyPlayer =({token ,setDeviceId,setDuration,setPosition,setI
       // 기기 준비
       newPlayer.addListener('player_state_changed',(state:any)=> {
         if(!state) return;
-        setIsPaused(state.pasued);
+        setIsPaused(!!state.paused);
         setPosition(state.position);
         setDuration(state.duration);
       });
