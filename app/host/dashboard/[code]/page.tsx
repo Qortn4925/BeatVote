@@ -14,8 +14,7 @@ export default function VoteRoom() {
    return (
     <div className="flex h-full w-full overflow-hidden">
       
-      <section className="flex-[6] border-r border-gray-200 bg-white">
-        
+      <section className="flex-[6] border-r border-gray-200 bg-white">       
         <ChatSection roomCode={roomCode} />
       </section>
 

@@ -65,7 +65,6 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
           }
           // 다음 노래 찾아서 틀기
           await syncPlayBack();
-
         }
         const syncPlayBack = async (newAddTrack?:any) => {
         if(!deviceId) return;
