@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SearchBar from "./SearchBar";
 import { supabase } from "@/lib/supabase";
 import PlayList from "./PlayList";
@@ -23,7 +23,7 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
     const [duration,setDuration]= useState(0);
     const [userId,setUserId]=useState<string |null>(null);
     const [myVotes,setMyVotes]= useState<string[]>([]);
-     
+    const playerRef = useRef<any>(null);
         const getRoomId= async () => {
         const roomId= await roomService.getRoomId(roomCode);
           if(roomId)  setRoomId(roomId);
@@ -65,7 +65,6 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
           }
           // 다음 노래 찾아서 틀기
           await syncPlayBack();
-
         }
         const syncPlayBack = async (newAddTrack?:any) => {
         if(!deviceId) return;
@@ -123,13 +122,14 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
         }
      
         const handlePlayerControl= async()=>{
-          if(!player) return;
+          const p=playerRef.current;
           
           //비동기 오류...
             setTimeout(async ()=> {
-              if(typeof player.togglePlay ==='function'){
+              if(p &&typeof p.togglePlay ==='function'){
                 try {
-                  await player.togglePlay();
+                  console.log("여기실행");
+                  await p.togglePlay();
                 }catch (e){
                   console.error("재생 제어 실패", e);
                 }
@@ -177,8 +177,14 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
       }
      },[isPaused,player,duration]);
      
-        
-   return (
+      // 2. player가 생성되거나 변경될 때마다 ref에 최신값 복사
+      useEffect(() => {
+        if (player) {
+          playerRef.current = player;
+        }
+      }, [player]);  
+
+    return (
     <div>
       <Button onClick={()=>{setPosition(duration-5000)}}> 노래 종료</Button>
       <SearchBar roomId={roomId} onMusicAdded={handleMusicAdded}/>
