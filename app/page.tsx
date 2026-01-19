@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { access } from "fs";
 
 export default function Home() {
+  
   const handleLogin = async () => {
     const origin = window.location.origin;
     await supabase.auth.signInWithOAuth({
