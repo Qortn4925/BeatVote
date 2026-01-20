@@ -12,15 +12,19 @@ export const roomService= {
         return data?.id;
     },
 
-    async getRoomList() {
+    // roomlist가져오는 api
+     async getRoomList(page:number) {
+        const limit =8;
+        const from=limit*(page-1)+1;
+        const to=limit*(page);
         const {data:roomList,error}=await supabase
             .from('rooms')
             .select()
-            .limit(8);
+            .range(from,to);
 
             return roomList;
     },
-    async countMaxPage(){
+     async countMaxPage(){
     const {count,error}= await supabase
             .from('rooms')
             .select('*', { count: 'exact', head: true });

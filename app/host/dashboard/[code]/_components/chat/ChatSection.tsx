@@ -63,6 +63,7 @@ export default function ChatSection({roomCode}:{ roomCode: string}) {
              supabase.removeChannel(channel);
         }
     },[roomId])
+    
     return (
     <div className="flex flex-col h-[600px] border bg-white rounded-lg overflow-hidden">
         {/* 헤더: 딱 자기 높이만 차지 (flex-none) */}

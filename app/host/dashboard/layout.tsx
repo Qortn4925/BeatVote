@@ -6,7 +6,7 @@ export default function DashBoardLayout({
     children,
 }:{
     children:React.ReactNode
-}) {
+}) {e
 
  const router=useRouter();
 
