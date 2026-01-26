@@ -4,6 +4,7 @@ import CreateDialogButton from "@/components/dashboard/CreateDialognButton";
 import { supabase } from "@/lib/supabase";
 import { Description } from "@radix-ui/react-dialog";
 import { useRouter } from "next/navigation";
+import { toast, Toaster } from "sonner";
 export default function DashBoardLayout({
     children,
 }:{
@@ -38,8 +39,11 @@ export default function DashBoardLayout({
         if(data) {
           const newRoomCode=data[0].room_code;
             router.push(`/host/dashboard/${newRoomCode}`);
+            toast.info("방 생성에 성공하셨습니다.",{position:"top-center"});
         }
     }
+
+    
 
    return (
     <div className="flex h-screen w-full bg-gray-50">
@@ -52,6 +56,7 @@ export default function DashBoardLayout({
 
       <main className="flex-1 overflow-hidden">
         {children}
+        <Toaster/>
       </main>
     </div>
   );
