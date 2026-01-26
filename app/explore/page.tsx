@@ -7,9 +7,10 @@ import { roomService } from "@/services/roomServices";
 
 export default async function RoomExplorePage({searchParams}:{searchParams:Promise<{page?:string}>}) {
       const {page}=await searchParams;
-      const roomList=await roomService.getRoomList(page);
-      const totalCount= await roomService.countMaxPage();
       const currentPage=Number(page)||1;
+
+      const roomList=await roomService.getRoomList(currentPage);
+      const totalCount= await roomService.countMaxPage();
 
       const maxPage=Math.ceil((totalCount||0)/8);
 
