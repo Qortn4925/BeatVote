@@ -16,7 +16,6 @@ import { useTabStore } from "@/app/store/useTabStore";
 export default function MusicSection({roomCode}:{ roomCode: string} ) {
     const [playList,setPlayList]=useState<any[]>([]);
     const [roomId,setRoomId]=useState<string | null> (null);
-    const [spotifyToken,setSpotifyToken]=useState("");
     const [isHost,setIsHost]=useState(false);
     const [deviceId,setDeviceId] =useState("");
     const [playingTrack,setPlayingTrack]=useState<any>(null);
@@ -25,7 +24,9 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
     const [duration,setDuration]= useState(0);
     const [userId,setUserId]=useState<string |null>(null);
     const [myVotes,setMyVotes]= useState<string[]>([]);
+
     const activeTab = useTabStore((state) => state.activeTab);
+
     const playerRef = useRef<any>(null);
         const getRoomId= async () => {
         const roomId= await roomService.getRoomId(roomCode);
@@ -33,27 +34,30 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
        }
 
 
-        const fetchHostToken=async()=>{
-          const {data:{session}} = await supabase.auth.getSession();
-          // 호스트 
-          if(session?.provider_token){
-            setSpotifyToken(session.provider_token);
+        const checkUserIdentity = async () => {
+          const { data: { session } } = await supabase.auth.getSession();
+
+          // 1. 호스트(로그인 유저)인 경우
+          if (session?.user) {
             setUserId(session.user.id);
             setIsHost(true);
-          }//게스트 토큰
-          else{
-            setUserId(getOrCreateGuestId());
+            
+            // (선택사항) 호스트라면 토큰 매니저를 한 번 깨워두는 것도 좋음 (Pre-fetch)
+            // spotifyTokenManager.getToken(); 
+          } 
+          // 2. 게스트(비로그인)인 경우
+          else {
+            const guestId = getOrCreateGuestId();
+            setUserId(guestId);
+            setIsHost(false);
           }
-            console.log(userId, "유저아읻 확인");
-          
-        }
-
+        };
         // 노래 재생시키는 함수
         const playTrack = async (trackUri:string) => {
           //없어야 종료...
           if(!trackUri) return;
           
-          spotifyService.play(spotifyToken,deviceId,trackUri);
+          spotifyService.play(deviceId,trackUri);
           
         }
         
@@ -80,8 +84,6 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
             if(!nextTrack &&newAddTrack){
               nextTrack=newAddTrack;
             }
-            console.log(newAddTrack,"new ");
-            console.log(nextTrack,"데이터 가져오는거");
           if(nextTrack) {
             await playTrack(nextTrack.tracks.uri);
             await playlistService.updateStatus(roomId,nextTrack.id,'playing');
@@ -140,11 +142,16 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
             },50);
         }
 
-        const player = useSpotifyPlayer({token:spotifyToken,setDeviceId,setPosition,setDuration ,setIsPaused});
+       const player = useSpotifyPlayer({
+       setDeviceId,
+       setDuration, 
+       setPosition, 
+       setIsPaused
+   });
         // 실행 순서 보장과 ,렌더링 방지를 위한 useEffect 쪼개기 
         useEffect(()=> {
           getRoomId();
-          fetchHostToken();
+          checkUserIdentity();
         },[roomCode])
 
         useEffect(()=>{

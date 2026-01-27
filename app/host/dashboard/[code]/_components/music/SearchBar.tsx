@@ -4,50 +4,36 @@ import { supabase } from "@/lib/supabase";
 import { playlistService } from "@/services/playlistService";
 import { useTabStore } from "@/app/store/useTabStore";
 import { Button } from "@/components/ui/button";
+import { spotifyService } from "@/services/spotifyService";
 
 export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusicAdded:(track:any) => void} ) {
     const [searchQuery,setSearchQuery] =useState('');
     const [searchList,setSearchList] =useState<any[]>([]);
      const setTab=useTabStore((state)=>state.setTab);
     
- useEffect (()=>{
-    if(searchQuery.length<2){
+ useEffect(() => {
+    // 1. 검색어 검증 (UI 로직)
+    if (searchQuery.length < 2) {
         setSearchList([]);
         return;
     }
-    const searchTracks = async () => {
-        const { data:{session}} =await supabase.auth.getSession();
-        const spotifyToken=session?.provider_token;
-        if(!spotifyToken){
-            console.error("spotify 토큰오류 x");
-            return;
-        }
-        try{
-            const response =await fetch(
-           `https://api.spotify.com/v1/search?q=${encodeURIComponent(searchQuery)}&type=track&limit=5`,
-          {
-            headers: { Authorization: `Bearer ${spotifyToken}`,
-                        'Content-Type': 'application/json' 
-            }
-          }
-        );
-        const data =await response.json();
-        const tracks=data.tracks.items.map((item: any)=>({
-            id:item.id,
-            name:item.name,
-            artist:item.artists[0].name,
-            albumArt:item.album.images[0]?.url || '',
-            uri:item.uri
-        }));
-        setSearchList(tracks);
-        }catch(error){
-            console.error("error",error);
-        }
-    }
 
-    const timer = setTimeout(searchTracks,500);
-    return ()=> clearTimeout(timer);
- } , [searchQuery]);
+    // 2. 검색 실행 함수
+    const searchTracks = async () => {
+        try {
+            const tracks = await spotifyService.search(searchQuery);
+            setSearchList(tracks);
+        } catch (error) {
+            console.error("검색 실패:", error);
+            setSearchList([]);
+        }
+    };
+
+    // 3. 디바운싱 (타이핑 멈추면 0.5초 뒤 실행)
+    const timer = setTimeout(searchTracks, 500);
+
+    return () => clearTimeout(timer);
+}, [searchQuery]);
 
   const handleAddTrack=async (trackId,trackName,artist,albumArt,trackUri)=>{
     // room_id, track_id,track_name,artist_name , album_art , trackUri
