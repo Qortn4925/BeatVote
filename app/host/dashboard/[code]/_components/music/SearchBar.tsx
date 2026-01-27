@@ -2,11 +2,14 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { playlistService } from "@/services/playlistService";
+import { useTabStore } from "@/app/store/useTabStore";
+import { Button } from "@/components/ui/button";
 
 export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusicAdded:(track:any) => void} ) {
     const [searchQuery,setSearchQuery] =useState('');
     const [searchList,setSearchList] =useState<any[]>([]);
- 
+     const setTab=useTabStore((state)=>state.setTab);
+    
  useEffect (()=>{
     if(searchQuery.length<2){
         setSearchList([]);
@@ -65,7 +68,7 @@ export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusi
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value) }
-          placeholder="검색"
+          placeholder="듣고싶은 노래를 추가해주세요."
           className="w-full p-4 pl-12 bg-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
         />
         <span className="absolute left-4 top-4 text-gray-400"></span>
@@ -91,6 +94,9 @@ export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusi
             </div>
         ))}
       </div>
+      <Button
+       onClick={() => setTab('PLAYLIST')}
+      >x</Button>
       
       <div className="mt-6 pt-6 border-t border-gray-100">
         <p className="text-sm font-semibold text-gray-400"></p>

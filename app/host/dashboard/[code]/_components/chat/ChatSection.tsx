@@ -60,7 +60,12 @@ export default function ChatSection({roomCode}:{ roomCode: string}) {
 
          });
    return ()=> {
+
+        if(channel){
              supabase.removeChannel(channel);
+
+        }
+
         }
     },[roomId])
     

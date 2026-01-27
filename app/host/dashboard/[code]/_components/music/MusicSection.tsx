@@ -10,7 +10,9 @@ import { roomService } from "@/services/roomServices";
 import { Button } from "@/components/ui/button";
 import { UUID } from "crypto";
 import { votesService } from "@/services/votesService";
+import { useTabStore } from "@/app/store/useTabStore";
 
+ type TabType='PLAYLIST' | 'SEARCH'
 export default function MusicSection({roomCode}:{ roomCode: string} ) {
     const [playList,setPlayList]=useState<any[]>([]);
     const [roomId,setRoomId]=useState<string | null> (null);
@@ -23,6 +25,7 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
     const [duration,setDuration]= useState(0);
     const [userId,setUserId]=useState<string |null>(null);
     const [myVotes,setMyVotes]= useState<string[]>([]);
+    const activeTab = useTabStore((state) => state.activeTab);
     const playerRef = useRef<any>(null);
         const getRoomId= async () => {
         const roomId= await roomService.getRoomId(roomCode);
@@ -138,58 +141,64 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
         }
 
         const player = useSpotifyPlayer({token:spotifyToken,setDeviceId,setPosition,setDuration ,setIsPaused});
-    // 실행 순서 보장과 ,렌더링 방지를 위한 useEffect 쪼개기 
-     useEffect(()=> {
-      getRoomId();
-      fetchHostToken();
-     },[roomCode])
+        // 실행 순서 보장과 ,렌더링 방지를 위한 useEffect 쪼개기 
+        useEffect(()=> {
+          getRoomId();
+          fetchHostToken();
+        },[roomCode])
 
-     useEffect(()=>{
-      if(roomId){
-        syncPlayBack();
-        syncRoomState();
-        // 투표 감지
-        const channel = playlistService.subscribeToPlaylist(roomId,syncRoomState);
+        useEffect(()=>{
+          if(roomId){
+            syncPlayBack();
+            syncRoomState();
+            // 투표 감지
+            const channel = playlistService.subscribeToPlaylist(roomId,syncRoomState);
+            
+            return ()=> {
+              supabase.removeChannel(channel);
+            }
+          }
+        },[roomId])
         
-        return ()=> {
-          supabase.removeChannel(channel);
-        }
-      }
-     },[roomId])
-    
-     // 타이머
-     useEffect(()=>{
-      let timer:NodeJS.Timeout;
-      if(!isPaused &&player){
-        timer=setInterval(()=>{
-          setPosition((prev)=>{
-          const currentPos=prev+1000;
-             if(duration>0 && (duration-currentPos)<1500){
-              handleTrackEnd(roomId);
-              clearInterval(timer);
-             }
-             return currentPos;
-        });
-        },1000);
-      }
-      return () =>{
-        if(timer) clearInterval(timer);
-      }
-     },[isPaused,player,duration]);
-     
-      // 2. player가 생성되거나 변경될 때마다 ref에 최신값 복사
-      useEffect(() => {
-        if (player) {
-          playerRef.current = player;
-        }
-      }, [player]);  
+        // 타이머
+        useEffect(()=>{
+          let timer:NodeJS.Timeout;
+          if(!isPaused &&player){
+            timer=setInterval(()=>{
+              setPosition((prev)=>{
+              const currentPos=prev+1000;
+                if(duration>0 && (duration-currentPos)<1500){
+                  handleTrackEnd(roomId);
+                  clearInterval(timer);
+                }
+                return currentPos;
+            });
+            },1000);
+          }
+          return () =>{
+            if(timer) clearInterval(timer);
+          }
+        },[isPaused,player,duration]);
+        
+          // 2. player가 생성되거나 변경될 때마다 ref에 최신값 복사
+          useEffect(() => {
+            if (player) {
+              playerRef.current = player;
+            }
+          }, [player]);  
 
     return (
     <div>
-      <Button onClick={()=>{setPosition(duration-5000)}}> 노래 종료</Button>
-      <SearchBar roomId={roomId} onMusicAdded={handleMusicAdded}/>
+      {/* <Button onClick={()=>{setPosition(duration-5000)}}> 노래 종료</Button> */}
       <CurrentTrack playingTrack={playingTrack} isPaused={isPaused} onTogglePlay={handlePlayerControl}    duration={duration} position={position}/>
-      <PlayList playList={playList} myVotes={myVotes} onVoted={handleVoteTrack}/>
+      {activeTab==='PLAYLIST'?(
+        <PlayList playList={playList} myVotes={myVotes} onVoted={handleVoteTrack}/>
+      )
+      :(
+      <SearchBar roomId={roomId} onMusicAdded={handleMusicAdded}/>
+      )  
+    }
+      
     </div>
   );
 }

@@ -35,7 +35,7 @@ export const chatService={
         
     },
 
-    async subscribeToChat (roomId:UUID,onUpdate:(newMessage:any)=>void) {
+     subscribeToChat (roomId:UUID,onUpdate:(newMessage:any)=>void) {
         return supabase
        .channel(`chats-${roomId}`)
             .on(

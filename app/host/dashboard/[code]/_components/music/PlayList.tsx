@@ -1,9 +1,9 @@
-'use clinet';
 import { ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
+import { useTabStore } from "@/app/store/useTabStore";
 
 
 interface PlayListProps {
@@ -16,14 +16,59 @@ export default function PlayList({playList,myVotes , onVoted}:PlayListProps) {
 
 
     return <div className="flex flex-col h-full space-y-4">
-      <div className="flex items-center justify-between px-2">
+      {/* <div className="flex items-center justify-between px-2">
         <h3 className="text-sm font-semibold text-muted-foreground">투표 리스트</h3>
         <Badge variant="secondary">{playList.length} Tracks</Badge>
-      </div>
+      </div> */}
+      <PlayListHeader count={playList.length}/>
 
       <ScrollArea className="flex-1 pr-4">
         <div className="space-y-3">
           {playList.map((track, index) => (
+            <PlayListItem
+              key={track.id}
+              track={track}
+              index={index}
+              isVoted={myVotes.includes(track.id)}
+              onVoted={onVoted}
+              />
+          ))}
+        </div>
+      </ScrollArea>
+    </div>
+}
+
+function PlayListHeader({count}:{count:number}) {
+  const setTab=useTabStore((state)=>state.setTab);
+  return (
+    <div className="flex items-center justify-between px-2 mb-4">
+      <div className="flex items-center gap-2">
+        <h3 className="text-sm font-semibold text-muted-foreground">투표 리스트</h3>
+        <Badge variant="secondary">{count} Tracks</Badge>
+      </div>
+      
+      {/* 검색 탭으로 이동하는 버튼 (추가 예정인 기능) */}
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={() => setTab('SEARCH')}
+        className="gap-2"
+      >
+        곡 추가하기
+      </Button>
+    </div>
+  );
+};
+
+interface ItemProps{
+  track:any;
+  index: number;
+  isVoted:boolean;
+  onVoted:(id:string)=>void;
+}
+function PlayListItem ( {track ,index,isVoted,onVoted}:ItemProps){
+
+  return  (
             <Card key={track.id} className="overflow-hidden border-none bg-secondary/30">
               <CardContent className="p-3 flex items-center gap-4">
                 {/* 순위 표시 */}
@@ -50,7 +95,7 @@ export default function PlayList({playList,myVotes , onVoted}:PlayListProps) {
                     variant="ghost" 
                     size="icon" 
                     className="h-8 w-8 hover:bg-primary/20 hover:text-primary"
-                    disabled={myVotes.includes(track.id)}
+                    disabled={isVoted}
                     onClick={()=>onVoted(track.id)}
                   >
                     <ChevronUp className="h-5 w-5" />
@@ -59,8 +104,5 @@ export default function PlayList({playList,myVotes , onVoted}:PlayListProps) {
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
-      </ScrollArea>
-    </div>
+          )
 }

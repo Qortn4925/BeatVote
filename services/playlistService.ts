@@ -142,7 +142,7 @@ export const playlistService= {
      
   },
 
-  async subscribeToPlaylist(roomId:UUID, onUpdate:()=>void){
+   subscribeToPlaylist(roomId:UUID, onUpdate:()=>void){
     return supabase
     .channel(`rooms-${roomId}`)
     .on(
