@@ -2,7 +2,7 @@
 
 import { spotifyTokenManager } from "@/lib/spotifyTokenManager";
 
-const BASE_URL="https://api.spotify.com/v1/me/player/"
+const BASE_URL="https://api.spotify.com/v1/"
 
 
 // 내부에서만 쓸 헬퍼 함수 (객체 밖으로 빼서 재사용성을 높임)
@@ -83,6 +83,7 @@ export const spotifyService = {
       uri: item.uri,
     }));
   },
+
   // 
   async transferPlayback(deviceId: string) {
     return spotifyFetch('/me/player', {

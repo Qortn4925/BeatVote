@@ -5,8 +5,8 @@ class SpotifyTokenManager {
   private supabase =  supabase
   
   private accessToken: string | null = null;
-  private tokenExpiresAt: number = 0; // Unix Timestamp (ms)
-  private refreshPromise: Promise<string> | null = null; // ✨ 중복 요청 방지용 잠금 장치
+  private tokenExpiresAt: number = 0; 
+  private refreshPromise: Promise<string> | null = null; 
 
   private constructor() {
     // 1. 탭이 백그라운드에서 돌아왔을 때(깨어났을 때) 즉시 상태 점검
@@ -48,11 +48,13 @@ class SpotifyTokenManager {
     // 아무도 갱신 안 하고 있다면? 내가 총대 메고 갱신 시작
     this.refreshPromise = (async () => {
       try {
-        console.log("🔄 토큰 갱신 프로세스 시작...");
+        console.log(" 토큰 갱신 프로세스 시작...");
         
         // Supabase 세션 갱신 (이게 돌면 provider_token도 바뀜)
-        const { data: { session }, error } = await this.supabase.auth.refreshSession();
-        
+        const { data: { session }, error } = await this.supabase.auth.getSession();
+          console.log(session," 세션값 확인");
+          console.log(error,"에러 값 확인ㄴ");
+          console.log(session?.provider_token,"값");
         if (error || !session?.provider_token) {
           throw new Error("토큰 갱신 실패: 다시 로그인해주세요.");
         }
@@ -62,7 +64,7 @@ class SpotifyTokenManager {
         // expires_at은 초 단위이므로 ms로 변환
         this.tokenExpiresAt = (session.expires_at || 0) * 1000; 
 
-        console.log("✅ 토큰 갱신 완료!");
+        console.log(" 토큰 갱신 완료!");
         return session.provider_token;
       } finally {
         // 작업 끝나면 잠금 해제

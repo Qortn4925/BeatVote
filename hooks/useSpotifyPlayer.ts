@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { spotifyTokenManager } from "@/lib/spotifyTokenManager"; // ✅ 매니저 임포트
-import { spotifyService } from "@/lib/spotifyService"; // ✅ 서비스 임포트
+import { spotifyService } from "@/services/spotifyService";
 
 declare global {
     interface Window {
