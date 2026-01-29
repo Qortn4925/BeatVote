@@ -19,7 +19,6 @@ class SpotifyTokenManager {
     }
   }
 
-  // 싱글톤 패턴
   public static getInstance(): SpotifyTokenManager {
     if (!SpotifyTokenManager.instance) {
       SpotifyTokenManager.instance = new SpotifyTokenManager();

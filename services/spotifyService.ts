@@ -28,7 +28,7 @@ const spotifyFetch = async (endpoint: string, options: RequestInit = {}) => {
     throw new Error(`Spotify API Error: ${res.status} ${res.statusText}`);
   }
 
-  // 4. 응답 처리 (204 No Content인 경우 빈 리턴)
+  // 4. 응답 처리 
   if (res.status === 204) {
     return null;
   }
