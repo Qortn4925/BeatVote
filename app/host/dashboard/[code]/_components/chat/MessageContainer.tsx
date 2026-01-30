@@ -7,10 +7,9 @@ interface MessageContainerProps{
     currentUserId: string;
 }
 
-export default function MessageContainer({messageList}:MessageContainerProps){
+export default function MessageContainer({messageList,currentUserId}:MessageContainerProps){
 
     const scrollRef= useRef<HTMLDivElement>(null);
-    const currentUserId="hello";
 
     useEffect(() => {
     // ScrollArea 내부의 실제 스크롤되는 요소(viewport)를 찾아 맨 아래로 내립니다.

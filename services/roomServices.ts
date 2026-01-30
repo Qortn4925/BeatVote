@@ -3,13 +3,13 @@ import { supabase } from "@/lib/supabase";
 
 export const roomService= {
 
-    async getRoomId(roomCode:string){
+    async getRoomInfo(roomCode:string){
         const {data,error}=await supabase
         .from('rooms')
-        .select('id')
+        .select('id,host_id')
         .eq('room_code',roomCode)
         .single();
-        return data?.id;
+        return data;
     },
 
     // roomlist가져오는 api

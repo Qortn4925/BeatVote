@@ -13,45 +13,21 @@ import { votesService } from "@/services/votesService";
 import { useTabStore } from "@/app/store/useTabStore";
 
  type TabType='PLAYLIST' | 'SEARCH'
-export default function MusicSection({roomCode}:{ roomCode: string} ) {
+export default function MusicSection({roomId,userId,nickName,isHost}:{ roomId:string ,userId:string,nickName:string,isHost:boolean} ) {
     const [playList,setPlayList]=useState<any[]>([]);
-    const [roomId,setRoomId]=useState<string | null> (null);
-    const [isHost,setIsHost]=useState(false);
     const [deviceId,setDeviceId] =useState("");
     const [playingTrack,setPlayingTrack]=useState<any>(null);
     const[isPaused,setIsPaused]=useState(true);
     const [position,setPosition]=useState(0);
     const [duration,setDuration]= useState(0);
-    const [userId,setUserId]=useState<string |null>(null);
+    const currentUserId=userId;
+    const curretnNickName=nickName;
+    const isRoomHost=isHost
     const [myVotes,setMyVotes]= useState<string[]>([]);
 
     const activeTab = useTabStore((state) => state.activeTab);
-
     const playerRef = useRef<any>(null);
-        const getRoomId= async () => {
-        const roomId= await roomService.getRoomId(roomCode);
-          if(roomId)  setRoomId(roomId);
-       }
 
-
-        const checkUserIdentity = async () => {
-          const { data: { session } } = await supabase.auth.getSession();
-
-          // 1. 호스트(로그인 유저)인 경우
-          if (session?.user) {
-            setUserId(session.user.id);
-            setIsHost(true);
-            
-            // (선택사항) 호스트라면 토큰 매니저를 한 번 깨워두는 것도 좋음 (Pre-fetch)
-            // spotifyTokenManager.getToken(); 
-          } 
-          // 2. 게스트(비로그인)인 경우
-          else {
-            const guestId = getOrCreateGuestId();
-            setUserId(guestId);
-            setIsHost(false);
-          }
-        };
         // 노래 재생시키는 함수
         const playTrack = async (trackUri:string) => {
           //없어야 종료...
@@ -112,7 +88,7 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
             alert("이미 투표한 곡입니다.");
             return ;
           }
-            const updatedList=await playlistService.voteTrackAndGetList(id,roomId,userId);
+            const updatedList=await playlistService.voteTrackAndGetList(id,roomId,currentUserId);
             setPlayList(updatedList);
             setMyVotes(prev=>[...prev,id]);
     
@@ -149,11 +125,6 @@ export default function MusicSection({roomCode}:{ roomCode: string} ) {
        setIsPaused
    });
         // 실행 순서 보장과 ,렌더링 방지를 위한 useEffect 쪼개기 
-        useEffect(()=> {
-          getRoomId();
-          checkUserIdentity();
-        },[roomCode])
-
         useEffect(()=>{
           if(roomId){
             syncPlayBack();

@@ -2,10 +2,8 @@ import { chatService } from "@/services/chatServices";
 import ChatInput from "./ChatInput";
 import { roomService } from "@/services/roomServices";
 import { useEffect, useState } from "react";
-import { useUserIdentifier } from "@/hooks/guestUtils";
 import MessageContainer from "./MessageContainer";
 import { supabase } from "@/lib/supabase";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Button } from "@/components/ui/button";
 import { Copy, CopyCheck, UserPlus } from "lucide-react";
 import { Popover } from "@radix-ui/react-popover";
@@ -13,42 +11,33 @@ import { PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, Popove
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 
 
-
-export default function ChatSection({roomCode}:{ roomCode: string}) {
+export default function ChatSection({roomId,userId,nickName,isHost}:{ roomId:string,userId:string,nickName:string,isHost:boolean}) {
         
-    const[roomId,setRoomId]=useState();
     const[messageList,setMessageList]=useState<any[]>([]);
-    const { userId, isAnonymous } = useUserIdentifier();
+    const currentUserId=userId;
+    const currentNickName=nickName;
     
     const handlSendMessage= async(text:string) =>{
-        const nickName= '안녕';
         
         const tempMessage={
             id:crypto.randomUUID(),
             message:text,
-            user_nickanme:nickName,
-            user_id:userId,
-            is_host:true,
+            user_nickname:currentNickName,
+            user_id:currentUserId,
+            is_host:isHost,
             created_at:new Date().toISOString
         }
 
-        chatService.sendMessage(tempMessage.id,text,roomId,userId,nickName);
+        chatService.sendMessage(tempMessage.id,text,roomId,currentUserId,nickName,isHost);
         setMessageList((prev:any)=>{
             return [...prev,tempMessage] }
         );
     }
-    const fetchData= async()=>{
-         const roomId= await roomService.getRoomId(roomCode);
-          if(roomId)  setRoomId(roomId);
-    }
+
     const getChatMessage =async ()=>{
         const messageList=await chatService.getMessage(roomId);
          setMessageList(messageList);
     }
-    useEffect(()=>{
-        fetchData();
-    },[roomCode])
-
     useEffect(()=>{
         if(roomId){
         getChatMessage();
@@ -65,15 +54,13 @@ export default function ChatSection({roomCode}:{ roomCode: string}) {
 
          });
    return ()=> {
-
         if(channel){
              supabase.removeChannel(channel);
-
         }
-
         }
     },[roomId])
     
+
     return (
     <div className="flex flex-col h-[600px] border bg-white rounded-lg overflow-hidden">
         {/* 헤더: 딱 자기 높이만 차지 (flex-none) */}
@@ -81,9 +68,9 @@ export default function ChatSection({roomCode}:{ roomCode: string}) {
             <ShareMenu/>
         </div>
             
-        {/* 🚀 메시지 영역 감옥: 여기서 flex-1과 min-h-0이 자식을 꽉 잡아야 함 */}
+        {/*  메시지 영역 감옥: 여기서 flex-1과 min-h-0이 자식을 꽉 잡아야 함 */}
         <div className="flex-1 min-h-0 w-full relative overflow-hidden">
-            <MessageContainer messageList={messageList} />
+            <MessageContainer messageList={messageList}  currentUserId={currentUserId}/>
         </div>
 
         {/* 입력창: 바닥 고정 (flex-none) */}

@@ -15,7 +15,6 @@ interface MessageItemProps {
 }
 
 export default function MessageItem({message, isMine}:MessageItemProps){
-        
     return (<div
             key={message.id}
             className={`flex flex-col ${isMine ? "items-end" : "items-start"}`}

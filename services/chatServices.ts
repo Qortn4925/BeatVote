@@ -5,7 +5,7 @@ import { UUID } from "crypto";
 
 export const chatService={
 
-    async sendMessage (id:UUID,text:string,roomId:UUID,userId:string,myNickname:string){
+    async sendMessage (id:UUID,text:string,roomId:UUID,userId:string,myNickname:string ,isHost:boolean){
     
         const { data:message,error } = await supabase
         .from('chat_messages')
@@ -14,7 +14,8 @@ export const chatService={
             message: text, 
             room_id: roomId,
             user_id: userId, 
-            user_nickname: myNickname 
+            user_nickname: myNickname ,
+            is_host:isHost
         }])
         .select();
         return message;
