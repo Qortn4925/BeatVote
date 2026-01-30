@@ -49,6 +49,7 @@ export default function MusicSection({roomId,userId,nickName,isHost}:{ roomId:st
           // 다음 노래 찾아서 틀기
           await syncPlayBack();
         }
+        
         const syncPlayBack = async (newAddTrack?:any) => {
         if(!deviceId) return;
         // 재생 상태 확인

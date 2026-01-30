@@ -38,9 +38,8 @@ interface CurrentTrackProps {
     if(!playingTrack) {
         return <div> 재생중인곡 x</div>
     }
-  
-    
-    return  (<Card className="overflow-hidden border-none bg-gradient-to-br from-secondary/40 to-background shadow-lg">
+
+return  (<Card className="overflow-hidden border-none bg-gradient-to-br from-secondary/40 to-background shadow-lg">
                 <CardContent className="p-4">
                             {/* 앨범 아트 */}
                     <div className="flex flex-col items-center space-y-4">

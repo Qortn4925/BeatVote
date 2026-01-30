@@ -70,20 +70,6 @@ export const spotifyService = {
     }
   },
 
-  async search(query: string) {
-    const data = await spotifyFetch(`/search?q=${encodeURIComponent(query)}&type=track&limit=5`);
-
-    if (!data?.tracks?.items) return [];
-
-    return data.tracks.items.map((item: any) => ({
-      id: item.id,
-      name: item.name,
-      artist: item.artists[0].name,
-      albumArt: item.album.images[0]?.url || '',
-      uri: item.uri,
-    }));
-  },
-
   // 
   async transferPlayback(deviceId: string) {
     return spotifyFetch('/me/player', {

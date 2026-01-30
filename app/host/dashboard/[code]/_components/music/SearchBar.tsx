@@ -5,6 +5,7 @@ import { playlistService } from "@/services/playlistService";
 import { useTabStore } from "@/app/store/useTabStore";
 import { Button } from "@/components/ui/button";
 import { spotifyService } from "@/services/spotifyService";
+import { searchSpotify } from "@/app/actions/spotifyActions";
 
 export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusicAdded:(track:any) => void} ) {
     const [searchQuery,setSearchQuery] =useState('');
@@ -12,24 +13,26 @@ export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusi
      const setTab=useTabStore((state)=>state.setTab);
     
  useEffect(() => {
-    // 1. 검색어 검증 (UI 로직)
+   
+
     if (searchQuery.length < 2) {
         setSearchList([]);
         return;
     }
-
     // 2. 검색 실행 함수
     const searchTracks = async () => {
         try {
-            const tracks = await spotifyService.search(searchQuery);
-            setSearchList(tracks);
+            // const tracks = await spotifyService.search(searchQuery);
+            // console.log(tracks," 트랙 값 까보기");
+            const  rawTracks= await searchSpotify(searchQuery);
+            console.log(rawTracks,"rawTracks");
+            setSearchList(rawTracks);
         } catch (error) {
             console.error("검색 실패:", error);
             setSearchList([]);
         }
     };
 
-    // 3. 디바운싱 (타이핑 멈추면 0.5초 뒤 실행)
     const timer = setTimeout(searchTracks, 500);
 
     return () => clearTimeout(timer);
