@@ -58,15 +58,22 @@ export default function MusicSection({roomId,userId,nickName,isHost}:{ roomId:st
           if (currentTrack) return;
           // 재생중인곡 없으면 투표수 높은거
           let nextTrack= await playlistService.getTopVotedTrack(roomId);
-
             if(!nextTrack &&newAddTrack){
               nextTrack=newAddTrack;
             }
           if(nextTrack) {
             if(isRoomHost){
             await playTrack(nextTrack.tracks.uri);
-            }
             await playlistService.updateStatus(roomId,nextTrack.id,'playing');
+            const trackInfo = {
+                name: nextTrack.tracks.name,
+                artist: nextTrack.tracks.artist,
+                album_art: nextTrack.tracks.album_art,
+                uri: nextTrack.tracks.uri
+            };
+            await roomService.updateRoomCurrentTrack(roomId,trackInfo);  
+          }
+          
             await syncRoomState();
           } 
        }

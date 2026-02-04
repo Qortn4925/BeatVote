@@ -31,5 +31,13 @@ export const roomService= {
             
              console.log(count);
              return count;
+    } ,
+    async updateRoomCurrentTrack (roomId:string ,track:{}){
+         await supabase
+         .from('rooms')
+         .update({
+            current_track:track
+         })
+         .eq('id',roomId);
     }
 }
