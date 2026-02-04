@@ -11,29 +11,30 @@ export default function Home() {
  
 
   return (
-    <div className="flex  min-h-screen">
-      {/* <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8 bg-white">
-      <h1 className="text-3xl font-bold mb-4">BeatVote</h1>
-      <button 
-        onClick={handleLogin}
-        className="bg-green-500 text-white px-6 py-2 rounded-full font-bold"
-      >
-        Spotify 
-      </button>
-      </div> */}
+    <div className="flex min-h-screen w-full bg-black text-white">
+    
      <LoginForm/>
-     <div className="relative hidden w-1/2 overflow-hidden bg-[#1DB954] lg:block">
-        <Image
-          src="/images/login.png" // public 경로는 '/'로 시작합니다.
-          alt="Login Pattern"
-          fill // 부모 div를 꽉 채울 때 사용
-          className="object-cover p-12 transition-transform duration-700 hover:scale-110"
-          priority
-        />
-        <div className="absolute inset-0 bg-black/5" />
+       
+      <div 
+        className="relative hidden w-1/2 overflow-hidden lg:block"
+        style={{
+            backgroundColor: '#050505', 
+            backgroundImage: "url('/images/background.png')", 
+          
+            backgroundSize: "cover", 
+            backgroundRepeat: "no-repeat", 
+            backgroundPosition: "center center"
+        }}
+      >
+       <div className="absolute inset-0 bg-[#1DB954]/10 mix-blend-overlay pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/40 pointer-events-none" />
+        
+       
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+           <div className="w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+        </div>
       </div>
-  
-    </div>
+      </div>
   );
 }
 
@@ -55,10 +56,19 @@ function LoginForm(){
   };
 
   return (
-  <div className="flex w-full flex-col justify-center px-8 lg:w-1/2 xl:px-24">
-        <div className="mx-auto w-full max-w-md space-y-10">
-          {/* 서비스 정체성 */}
-          <div className="space-y-4">
+  <div className="flex w-full flex-col justify-center px-8 lg:w-1/2 xl:px-24 bg-black relative">
+        <div className="absolute top-[-20%] left-[-20%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+
+      <div className="mx-auto w-full max-w-md space-y-12 relative z-10">
+      <div className="space-y-6 text-center lg:text-left">
+          <div className="relative w-24 h-24 mx-auto lg:mx-0 mb-4">
+             <Image 
+               src="/images/BeatVoteIcon.png" 
+               alt="BeatVote Logo" 
+               fill 
+               className="object-contain mix-blend-screen drop-shadow-[0_0_10px_rgba(29,185,84,0.5)]"
+             />
+          </div>
             <h1 className="text-6xl font-black tracking-tighter text-[#1DB954]">
               BeatVote
             </h1>
@@ -67,6 +77,7 @@ function LoginForm(){
               지금 스포티파이로 접속해 보세요.
             </p>
           </div>
+        
 
           {/* 로그인 버튼 */}
           <div className="space-y-4">

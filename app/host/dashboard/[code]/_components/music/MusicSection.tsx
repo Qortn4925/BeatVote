@@ -24,12 +24,13 @@ export default function MusicSection({roomId,userId,nickName,isHost}:{ roomId:st
     const curretnNickName=nickName;
     const isRoomHost=isHost
     const [myVotes,setMyVotes]= useState<string[]>([]);
+    const [displayTrack, setDisplayTrack] = useState<any>(null);
 
     const activeTab = useTabStore((state) => state.activeTab);
     const playerRef = useRef<any>(null);
-
         // 노래 재생시키는 함수
         const playTrack = async (trackUri:string) => {
+          if(!isRoomHost) return;
           //없어야 종료...
           if(!trackUri) return;
           
@@ -38,7 +39,7 @@ export default function MusicSection({roomId,userId,nickName,isHost}:{ roomId:st
         }
         
         const handleTrackEnd = async (roomId:string) => {
-
+          
           // 노래 종료시 ,검색후 상태 업데이트
           const currentTrack = await playlistService.getPlayingTrack(roomId);
           if (currentTrack) {
@@ -62,7 +63,9 @@ export default function MusicSection({roomId,userId,nickName,isHost}:{ roomId:st
               nextTrack=newAddTrack;
             }
           if(nextTrack) {
+            if(isRoomHost){
             await playTrack(nextTrack.tracks.uri);
+            }
             await playlistService.updateStatus(roomId,nextTrack.id,'playing');
             await syncRoomState();
           } 
@@ -165,11 +168,30 @@ export default function MusicSection({roomId,userId,nickName,isHost}:{ roomId:st
               playerRef.current = player;
             }
           }, [player]);  
+          useEffect(() => {
+        //  host가 감지해서 실행하기 위한 useEffect
+        if (!isRoomHost) return;
 
+        if (!deviceId) return;
+
+        if (!playingTrack && playList.length > 0) {
+          console.log("🎵 대기열 감지! 호스트가 재생을 시작합니다.");
+          syncPlayBack(); // 아까 막아뒀던 그 함수 실행!
+        }
+
+      }, [playList, playingTrack, isRoomHost, deviceId]);
+      // ui용  track
+      useEffect(() => {
+      if (playingTrack) {
+        // 노래가 나오고 있으면 -> 화면 정보도 최신화
+        setDisplayTrack(playingTrack);
+      }
+      // else { 노래가 꺼지면? -> 아무것도 안 함 (마지막 정보 유지) }
+    }, [playingTrack]);
     return (
     <div>
       {/* <Button onClick={()=>{setPosition(duration-5000)}}> 노래 종료</Button> */}
-      <CurrentTrack playingTrack={playingTrack} isPaused={isPaused} onTogglePlay={handlePlayerControl}    duration={duration} position={position}/>
+      <CurrentTrack displayTrack={displayTrack} playingTrack={playingTrack} isPaused={isPaused} onTogglePlay={handlePlayerControl}    duration={duration} position={position}/>
       {activeTab==='PLAYLIST'?(
         <PlayList playList={playList} myVotes={myVotes} onVoted={handleVoteTrack}/>
       )

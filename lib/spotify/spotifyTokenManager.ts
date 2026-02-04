@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { supabase } from "../supabase";
 
 class SpotifyTokenManager {
   private static instance: SpotifyTokenManager;

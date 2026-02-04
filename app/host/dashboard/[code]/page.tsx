@@ -85,15 +85,15 @@ export default function VoteRoom() {
     );
   }
    return (
-    <div className="flex h-full w-full overflow-hidden">
+    <div className="flex h-full w-full gap-4 p-4">
       
-      <section className="flex-[6] border-r border-gray-200 bg-white">       
+     <section className="flex-1 flex flex-col bg-card rounded-xl border border-border shadow-xl overflow-hidden">
         <ChatSection roomId={roomData.id}  userId={userIdentity.id} nickName={userIdentity.name} isHost={userIdentity.isHost}/>
       </section>
 
-      <section className="flex-[4] bg-gray-50 overflow-y-auto">
+     <aside className="w-[400px] flex flex-col bg-card rounded-xl border border-border shadow-xl overflow-hidden">
         <MusicSection roomId={roomData.id} userId={userIdentity.id} nickName={userIdentity.name} isHost={userIdentity.isHost} />
-      </section>
+     </aside>
 
     </div>
   );

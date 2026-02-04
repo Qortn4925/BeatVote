@@ -1,7 +1,8 @@
 "use client"
 
-import { spotifyTokenManager } from "@/lib/spotifyTokenManager";
+import { spotifyTokenManager } from "@/lib/spotify/spotifyTokenManager";
 
+spotifyTokenManager
 const BASE_URL="https://api.spotify.com/v1/"
 
 

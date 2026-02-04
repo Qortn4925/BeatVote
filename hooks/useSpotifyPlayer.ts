@@ -1,8 +1,8 @@
 'use client'; // ✅ 오타 수정
 
 import { useEffect, useState } from "react";
-import { spotifyTokenManager } from "@/lib/spotifyTokenManager"; // ✅ 매니저 임포트
 import { spotifyService } from "@/services/spotifyService";
+import { spotifyTokenManager } from "@/lib/spotify/spotifyTokenManager";
 
 declare global {
     interface Window {

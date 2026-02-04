@@ -17,7 +17,7 @@ export default function ChatSection({roomId,userId,nickName,isHost}:{ roomId:str
     const currentUserId=userId;
     const currentNickName=nickName;
     
-    const handlSendMessage= async(text:string) =>{
+    const handleSendMessage= async(text:string) =>{
         
         const tempMessage={
             id:crypto.randomUUID(),
@@ -62,22 +62,33 @@ export default function ChatSection({roomId,userId,nickName,isHost}:{ roomId:str
     
 
     return (
-    <div className="flex flex-col h-[600px] border bg-white rounded-lg overflow-hidden">
-        {/* 헤더: 딱 자기 높이만 차지 (flex-none) */}
-        <div className="flex-none h-12 border-b flex items-center px-4 bg-slate-50">방 제목
-            <ShareMenu/>
-        </div>
-            
-        {/*  메시지 영역 감옥: 여기서 flex-1과 min-h-0이 자식을 꽉 잡아야 함 */}
-        <div className="flex-1 min-h-0 w-full relative overflow-hidden">
-            <MessageContainer messageList={messageList}  currentUserId={currentUserId}/>
-        </div>
+   <div className="flex flex-col h-full w-full border border-border bg-transparent rounded-lg shadow-sm overflow-hidden">
+  
+  
+    <header className="h-14 flex-none border-b border-border flex items-center justify-between px-6 bg-card/50 backdrop-blur-md">
+       <span className="font-bold text-foreground">
+        방 제목
+        </span>
+        <ShareMenu />
+    </header>
+     
 
-        {/* 입력창: 바닥 고정 (flex-none) */}
-        <div className="flex-none p-4">
-        <ChatInput onSendMessage={handlSendMessage} disabled={false}/>
-        </div>
-    </div>
+
+  <div className="flex-1 overflow-y-auto relative">
+    <MessageContainer 
+      messageList={messageList} 
+      currentUserId={currentUserId}
+    />
+  </div>
+
+  <div className="flex-none p-3 bg-transparent border-border bg-card ">
+    <ChatInput 
+      onSendMessage={handleSendMessage} 
+      disabled={false}
+    />
+  </div>
+
+</div>
     );
 
 }

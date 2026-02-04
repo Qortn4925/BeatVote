@@ -28,8 +28,8 @@ export default function MessageItem({message, isMine}:MessageItemProps){
             <div
               className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm shadow-sm ${
                 isMine
-                  ? "bg-green-500 text-white rounded-tr-none" // 내 메시지 (우측)
-                  : "bg-white text-slate-800 border rounded-tl-none" // 남의 메시지 (좌측)
+                  ? "bg-green-500 text-white rounded-tr-none" 
+                  : "bg-white text-slate-800 border rounded-tl-none" 
               }`}
             >
               {message.message}
