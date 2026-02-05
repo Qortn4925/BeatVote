@@ -27,7 +27,7 @@ export default function VoteRoom() {
         if (!roomCode) return;
 
         // [A] 방 정보 가져오기 (API 호출)
-        const roomInfo = await roomService.getRoomInfo(roomCode);
+        const roomInfo = await roomService.getRoomInfo(roomCode as string);
         
         if (!roomInfo) {
           alert("존재하지 않는 방입니다.");

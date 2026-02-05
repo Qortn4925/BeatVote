@@ -127,7 +127,7 @@ export const playlistService= {
   },
 
   // 투표 후 tracklist 재반환.
-  async voteTrackAndGetList(id:UUID ,roomId:UUID , userId:UUID){
+  async voteTrackAndGetList(id:string ,roomId:string , userId:string){
      const {data,error}= await supabase.rpc('handle_track_vote',{
       p_playlist_id:id,
       p_room_id:roomId,
@@ -142,7 +142,7 @@ export const playlistService= {
      
   },
 
-   subscribeToPlaylist(roomId:UUID, onUpdate:()=>void){
+   subscribeToPlaylist(roomId:string, onUpdate:()=>void){
     return supabase
     .channel(`rooms-${roomId}`)
     .on(

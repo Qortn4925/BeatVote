@@ -93,7 +93,7 @@ export default function MusicSection({roomId,userId,nickName,isHost}:{ roomId:st
         }
 
 
-        const handleVoteTrack= async (id:UUID)=>{
+        const handleVoteTrack= async (id:string)=>{
             
           if(myVotes.includes(id)){
             alert("이미 투표한 곡입니다.");
@@ -198,7 +198,7 @@ export default function MusicSection({roomId,userId,nickName,isHost}:{ roomId:st
     return (
     <div>
       {/* <Button onClick={()=>{setPosition(duration-5000)}}> 노래 종료</Button> */}
-      <CurrentTrack displayTrack={displayTrack} playingTrack={playingTrack} isPaused={isPaused} onTogglePlay={handlePlayerControl}    duration={duration} position={position}/>
+      <CurrentTrack displayTrack={displayTrack} isPaused={isPaused} onTogglePlay={handlePlayerControl}    duration={duration} position={position}/>
       {activeTab==='PLAYLIST'?(
         <PlayList playList={playList} myVotes={myVotes} onVoted={handleVoteTrack}/>
       )

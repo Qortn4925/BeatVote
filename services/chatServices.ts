@@ -5,7 +5,7 @@ import { UUID } from "crypto";
 
 export const chatService={
 
-    async sendMessage (id:UUID,text:string,roomId:UUID,userId:string,myNickname:string ,isHost:boolean){
+    async sendMessage (id:string,text:string,roomId:string,userId:string,myNickname:string ,isHost:boolean){
     
         const { data:message,error } = await supabase
         .from('chat_messages')
@@ -22,7 +22,7 @@ export const chatService={
 
     },
 
-    async getMessage(roomId:UUID){
+    async getMessage(roomId:string){
         const {data:messageList,error} =await supabase
         .from('chat_messages')
         .select('*')
@@ -36,7 +36,7 @@ export const chatService={
         
     },
 
-     subscribeToChat (roomId:UUID,onUpdate:(newMessage:any)=>void) {
+     subscribeToChat (roomId:string,onUpdate:(newMessage:any)=>void) {
         return supabase
        .channel(`chats-${roomId}`)
             .on(

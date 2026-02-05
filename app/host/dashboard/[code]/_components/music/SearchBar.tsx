@@ -36,7 +36,7 @@ export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusi
     return () => clearTimeout(timer);
 }, [searchQuery]);
 
-  const handleAddTrack=async (trackId,trackName,artist,albumArt,trackUri)=>{
+  const handleAddTrack=async (trackId:string,trackName:string,artist:string,albumArt:string,trackUri:string)=>{
      const {track,isDuplicate} = await playlistService.addTrack(roomId,trackId,trackName,artist,albumArt,trackUri);
      console.log(track.tracks,"핸들 애드 트랙,");
      if(track && !isDuplicate){
