@@ -1,4 +1,4 @@
-import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import MessageItem from "./MessageItem";
 import { useEffect, useRef } from "react";
 
@@ -7,29 +7,25 @@ interface MessageContainerProps{
     currentUserId: string;
 }
 
-export default function MessageContainer({messageList}:MessageContainerProps){
+export default function MessageContainer({messageList,currentUserId}:MessageContainerProps){
 
-    const scrollRef= useRef<HTMLDivElement>(null);
-    const currentUserId="hello";
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  // 2. 스크롤 내리는 함수
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
-    useEffect(() => {
-    // ScrollArea 내부의 실제 스크롤되는 요소(viewport)를 찾아 맨 아래로 내립니다.
-    const scrollContainer = scrollRef.current?.querySelector('[data-radix-scroll-area-viewport]');
-    if (scrollContainer) {
-      scrollContainer.scrollTo({
-        top: scrollContainer.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  }, [messageList]);
-
+  
+  useEffect(() => {
+    scrollToBottom();
+  }, [messageList]); 
 return (
-  <ScrollArea ref={scrollRef} className="absolute inset-0 w-full" >
+
     <div className="flex flex-col space-y-4">
       {messageList?.length === 0 && (
         <div className="text-center text-muted-foreground py-10">
           첫 번째 메시지를 보내보세요! 🎵
-        </div>
+    </div>
       )}
 
       {messageList?.map((item,index) => {
@@ -38,7 +34,8 @@ return (
           <MessageItem key={`${item.id}-${index}`} message={item} isMine={isMine}/>
         );
       })}
+      <div ref={messagesEndRef} />
     </div>
-    </ScrollArea>
+    
   );
 }

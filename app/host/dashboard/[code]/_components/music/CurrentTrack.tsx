@@ -17,38 +17,34 @@ interface CurrentTrackProps {
     onTogglePlay:()=>void,
     position:number,
     duration:number,
-    playingTrack:{
+    displayTrack:{
         id:string;
         room_id:string;
         tracks:TrackMaster;
     }|null;
 }
 
- export  default function CurrentTrack({playingTrack,isPaused ,onTogglePlay ,position,duration}:CurrentTrackProps) {
+ export  default function CurrentTrack({displayTrack,isPaused ,onTogglePlay ,position,duration}:CurrentTrackProps) {
      
       const formatTime = (ms: number) => {
         const seconds = Math.floor((ms / 1000) % 60);
         const minutes = Math.floor((ms / (1000 * 60)) % 60);
         return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
          };
-
          const progress=duration>0?(position/duration)*100:0;
-
-
-    if(!playingTrack) {
+    if(!displayTrack) {
         return <div> 재생중인곡 x</div>
     }
-  
-    
-    return  (<Card className="overflow-hidden border-none bg-gradient-to-br from-secondary/40 to-background shadow-lg">
+
+return  (<Card className="overflow-hidden border-none bg-gradient-to-br from-secondary/40 to-background shadow-lg">
                 <CardContent className="p-4">
                             {/* 앨범 아트 */}
                     <div className="flex flex-col items-center space-y-4">
-                        <img src={playingTrack.tracks.album_art}/>
+                        <img src={displayTrack?.tracks.album_art}/>
                     
                         <div className="w-full text-center">
-                            <h2 className="line-clamp-1 text-lg font-bold">{playingTrack.tracks.name}</h2>
-                            <p className="text-sm text-muted-foreground">{playingTrack.tracks.artist}</p>
+                            <h2 className="line-clamp-1 text-lg font-bold">{displayTrack?.tracks.name}</h2>
+                            <p className="text-sm text-muted-foreground">{displayTrack?.tracks.artist}</p>
                         </div>
                         <div className="w-full space-y-1">
                             <Progress value={progress} className="h-1"/>

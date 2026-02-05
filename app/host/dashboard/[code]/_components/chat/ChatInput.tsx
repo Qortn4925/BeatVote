@@ -28,7 +28,7 @@ export default function ChatInput ({ onSendMessage, disabled }: ChatInputProps) 
   return (
     <form 
       onSubmit={handleSubmit}
-      className="flex items-center gap-2 p-4 border-t bg-white"
+      className="flex items-center gap-2 p-4 border-t bg-transparent"
     >
       <input
         ref={inputRef}
@@ -37,12 +37,12 @@ export default function ChatInput ({ onSendMessage, disabled }: ChatInputProps) 
         onChange={(e) => setText(e.target.value)}
         placeholder={disabled ? "연결 중..." : "메시지를 입력하세요..."}
         disabled={disabled}
-        className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+        className="bg-secondary text-foreground placeholder:text-muted-foreground  flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
       />
       <button
         type="submit"
         disabled={!text.trim() || disabled}
-        className="px-4 py-2 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 disabled:bg-gray-300 transition-colors"
+        className="px-4 py-2 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600  transition-colors"
       >
         전송
       </button>
