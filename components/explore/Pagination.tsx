@@ -29,25 +29,44 @@ export default function RoomPagination({maxPage,page}:RoomPaginationProps) {
         //url 변경
         router.push(`${pathname}?${param.toString()}`);
       }
+  if (maxPage <= 1) return null;
 
   return (
     <Pagination>
-    <PaginationContent className="w-full justify-between items-center">
-        {hasPrevious &&( <PaginationItem >
-          <PaginationPrevious href='#' className='border' onClick={()=>goToPage(page-1)}/>
-        </PaginationItem>)}
+      <PaginationContent className="w-full flex justify-center gap-4">
+        
+        {/* 이전 버튼: 비활성화 상태면 투명도 조절 */}
         <PaginationItem>
-          <p className='text-muted-foreground text-sm' aria-live='polite'>
-            Page <span className='text-foreground'>{page}</span> of <span className='text-foreground'>{maxPage}</span>
-          </p>
+          <PaginationPrevious 
+            href="#" 
+            onClick={(e) => {
+              e.preventDefault();
+              if (hasPrevious) goToPage(page - 1);
+            }}
+            className={`cursor-pointer select-none transition-opacity ${!hasPrevious ? 'opacity-30 pointer-events-none' : ''}`}
+          />
         </PaginationItem>
 
-          {hasNext &&(
         <PaginationItem>
-          <PaginationNext href='#' className='border' onClick={()=>goToPage(page+1)}/>
-        </PaginationItem>)
-          }
+          <div className="px-4 py-2 rounded-md bg-secondary/50 text-sm font-medium">
+             <span className="text-primary font-bold">{page}</span> 
+             <span className="text-muted-foreground mx-2">/</span> 
+             <span className="text-muted-foreground">{maxPage}</span>
+          </div>
+        </PaginationItem>
+
+        <PaginationItem>
+          <PaginationNext 
+            href="#" 
+            onClick={(e) => {
+              e.preventDefault();
+              if (hasNext) goToPage(page + 1);
+            }}
+            className={`cursor-pointer select-none transition-opacity ${!hasNext ? 'opacity-30 pointer-events-none' : ''}`}
+          />
+        </PaginationItem>
+
       </PaginationContent>
     </Pagination>
-  )
+  );
 }
