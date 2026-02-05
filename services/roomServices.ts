@@ -13,25 +13,45 @@ export const roomService= {
     },
 
     // roomlist가져오는 api
-     async getRoomList(page:number) {
+     async getRoomList(page:number,query:string='') {
         const limit =8;
-        const from=limit*(page-1)+1;
-        const to=limit*(page);
-        const {data:roomList,error}=await supabase
-            .from('rooms')
-            .select()
-            .range(from,to);
+        const from=limit*(page-1);
+        const to=limit*(page)-1;
+       let dbQuery = supabase
+        .from('rooms')
+        .select('*'); 
 
-            return roomList;
+    if (query) {
+        dbQuery = dbQuery.or(`title.ilike.%${query}%,genre_tag.ilike.%${query}%`);
+    }
+
+    const { data, error } = await dbQuery
+        .order('created_at', { ascending: false })
+        .range(from, to);
+    
+    if (error) {
+        console.error("Room fetch error:", error);
+        return [];
+    }
+    
+    return data;
     },
-     async countMaxPage(){
-    const {count,error}= await supabase
-            .from('rooms')
-            .select('*', { count: 'exact', head: true });
-            
-             console.log(count);
-             return count;
-    } ,
+    
+    async countMaxPage(query: string = '') {
+    // 여기도 동일하게 select -> filter -> count 순서 유지
+    let dbQuery = supabase
+        .from('rooms')
+        .select('*', { count: 'exact', head: true });
+
+    if (query) {
+        dbQuery = dbQuery.or(`title.ilike.%${query}%,genre_tag.ilike.%${query}%`);
+    }
+
+    const { count, error } = await dbQuery;
+    
+    if (error) throw error;
+    return count;
+    }   ,
     async updateRoomCurrentTrack (roomId:string ,track:{}){
          await supabase
          .from('rooms')
