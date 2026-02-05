@@ -41,7 +41,6 @@ export default function Home() {
 
 function LoginForm(){
     const handleLogin = async () => {
-    const origin = window.location.origin;
     await supabase.auth.signInWithOAuth({
       provider: 'spotify',
       options: {
@@ -50,7 +49,7 @@ function LoginForm(){
           access_type: 'offline',
           prompt: 'consent',
         },
-        redirectTo: `${origin}/host/dashboard`,
+        redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/host/dashboard`,
       },
     });
   };
