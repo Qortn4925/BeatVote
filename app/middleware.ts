@@ -11,7 +11,7 @@ export async function middleware(request: NextRequest) {
 
   // 2. 미들웨어 전용 Supabase 클라이언트 설정
   const supabase = createServerClient(
-    CookieOptions
+    
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
