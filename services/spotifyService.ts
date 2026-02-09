@@ -51,7 +51,6 @@ export const spotifyService = {
           uris: [trackUri],
         }),
       });
-      console.log(" 재생 시작:", trackUri);
     } catch (error) {
       console.error(" 재생 실패:", error);
     }
@@ -65,7 +64,6 @@ export const spotifyService = {
       await spotifyFetch(`me/player/pause?device_id=${deviceId}`, {
         method: 'PUT',
       });
-      console.log(" 일시정지 성공");
     } catch (error) {
       console.error(" 일시정지 실패:", error);
     }

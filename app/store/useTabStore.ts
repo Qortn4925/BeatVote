@@ -1,7 +1,9 @@
 import { create } from 'zustand'
+
+export type TabType = 'PLAYLIST' | 'SEARCH' | 'CURRENTTRACK';
 interface TabState{
-    activeTab:'PLAYLIST' |'SEARCH';
-    setTab:(tab:'PLAYLIST' |'SEARCH')=> void;
+    activeTab: TabType;
+    setTab:(tab:'PLAYLIST' |'SEARCH'|'CURRENTTRACK')=> void;
 }
 
 

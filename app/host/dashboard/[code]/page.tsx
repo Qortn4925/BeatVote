@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { getGuestInfo } from "@/lib/guestUtils";
 import { roomService } from "@/services/roomServices";
+import { useRecentRooms } from "@/hooks/useRecentRooms";
 
 
 export default function VoteRoom() {
@@ -14,19 +15,19 @@ export default function VoteRoom() {
     const roomCode= param.code;
     const router = useRouter();
     const [isLoading,setIsLoading]=useState(true);
-
+    const {addRoom}= useRecentRooms();
    const [userIdentity, setUserIdentity] = useState<{
     id: string;
     name: string;
     isHost: boolean;
   } | null>(null);
-  const [roomData, setRoomData] = useState<{ id: string; host_id: string } | null>(null);
+
+  const [roomData, setRoomData] = useState<{ id: string; host_id: string ,title:string } | null>(null);
     useEffect(()=>{
       const initializeRoom = async () => {
       try {
         if (!roomCode) return;
 
-        // [A] 방 정보 가져오기 (API 호출)
         const roomInfo = await roomService.getRoomInfo(roomCode as string);
         
         if (!roomInfo) {
@@ -35,7 +36,6 @@ export default function VoteRoom() {
           return;
         }
 
-        // [B] 내 신원 확인 (Supabase or Guest)
         let myId = '';
         let myName = '';
         
@@ -62,7 +62,7 @@ export default function VoteRoom() {
         setUserIdentity({
           id: myId,
           name: myName,
-          isHost: isHostUser, // ✅ 여기서 정확하게 판별됨
+          isHost: isHostUser, 
         });
 
       } catch (error) {
@@ -75,7 +75,19 @@ export default function VoteRoom() {
     initializeRoom();
     
   }, []); 
-  
+
+
+    useEffect(()=>{
+      if (roomData) {
+      const cleanCode = Array.isArray(roomCode) ? roomCode[0] : roomCode;
+
+      addRoom({
+        id: roomData.id,
+        code: cleanCode || "",
+        title: roomData.title
+      });
+    }
+    },[roomData])
 // 로딩 처리
   if (isLoading || !userIdentity || !roomData) {
     return (
@@ -84,11 +96,12 @@ export default function VoteRoom() {
       </div>
     );
   }
+
    return (
     <div className="flex h-full w-full gap-4 p-4">
       
      <section className="flex-1 flex flex-col bg-card rounded-xl border border-border shadow-xl overflow-hidden">
-        <ChatSection roomId={roomData.id}  userId={userIdentity.id} nickName={userIdentity.name} isHost={userIdentity.isHost}/>
+        <ChatSection roomId={roomData.id}  userId={userIdentity.id} nickName={userIdentity.name} isHost={userIdentity.isHost} title={roomData.title} />
       </section>
 
      <aside className="w-[400px] flex flex-col bg-card rounded-xl border border-border shadow-xl overflow-hidden">

@@ -10,9 +10,9 @@ import { roomService } from "@/services/roomServices";
 import { Button } from "@/components/ui/button";
 import { UUID } from "crypto";
 import { votesService } from "@/services/votesService";
-import { useTabStore } from "@/app/store/useTabStore";
+import { useTabStore ,TabType } from "@/app/store/useTabStore";
+import TabContentSection from "@/components/dashboard/TabContentSection";
 
- type TabType='PLAYLIST' | 'SEARCH'
 export default function MusicSection({roomId,userId,nickName,isHost}:{ roomId:string ,userId:string,nickName:string,isHost:boolean} ) {
     const [playList,setPlayList]=useState<any[]>([]);
     const [deviceId,setDeviceId] =useState("");
@@ -27,6 +27,7 @@ export default function MusicSection({roomId,userId,nickName,isHost}:{ roomId:st
     const [displayTrack, setDisplayTrack] = useState<any>(null);
 
     const activeTab = useTabStore((state) => state.activeTab);
+
     const playerRef = useRef<any>(null);
         // 노래 재생시키는 함수
         const playTrack = async (trackUri:string) => {
@@ -120,7 +121,6 @@ export default function MusicSection({roomId,userId,nickName,isHost}:{ roomId:st
             setTimeout(async ()=> {
               if(p &&typeof p.togglePlay ==='function'){
                 try {
-                  console.log("여기실행");
                   await p.togglePlay();
                 }catch (e){
                   console.error("재생 제어 실패", e);
@@ -182,7 +182,6 @@ export default function MusicSection({roomId,userId,nickName,isHost}:{ roomId:st
         if (!deviceId) return;
 
         if (!playingTrack && playList.length > 0) {
-          console.log("🎵 대기열 감지! 호스트가 재생을 시작합니다.");
           syncPlayBack(); // 아까 막아뒀던 그 함수 실행!
         }
 
@@ -196,17 +195,21 @@ export default function MusicSection({roomId,userId,nickName,isHost}:{ roomId:st
       // else { 노래가 꺼지면? -> 아무것도 안 함 (마지막 정보 유지) }
     }, [playingTrack]);
     return (
-    <div>
-      {/* <Button onClick={()=>{setPosition(duration-5000)}}> 노래 종료</Button> */}
-      <CurrentTrack displayTrack={displayTrack} isPaused={isPaused} onTogglePlay={handlePlayerControl}    duration={duration} position={position}/>
-      {activeTab==='PLAYLIST'?(
-        <PlayList playList={playList} myVotes={myVotes} onVoted={handleVoteTrack}/>
-      )
-      :(
-      <SearchBar roomId={roomId} onMusicAdded={handleMusicAdded}/>
-      )  
-    }
-      
-    </div>
+    <div className="w-full max-w-md mx-auto p-4">
+     
+            <TabContentSection
+                displayTrack={displayTrack}
+                isPaused={isPaused}
+                handlePlayerControl={handlePlayerControl}
+                duration={duration}
+                position={position}
+                playList={playList}
+                myVotes={myVotes}
+                handleVoteTrack={handleVoteTrack}
+                roomId={roomId}
+                handleMusicAdded={handleMusicAdded}
+            />
+        </div>
   );
 }
+

@@ -10,7 +10,6 @@ import { searchSpotify } from "@/app/actions/spotifyActions";
 export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusicAdded:(track:any) => void} ) {
     const [searchQuery,setSearchQuery] =useState('');
     const [searchList,setSearchList] =useState<any[]>([]);
-     const setTab=useTabStore((state)=>state.setTab);
     
  useEffect(() => {
    
@@ -23,7 +22,6 @@ export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusi
     const searchTracks = async () => {
         try {
             const  rawTracks= await searchSpotify(searchQuery);
-            console.log(rawTracks,"rawTracks");
             setSearchList(rawTracks);
         } catch (error) {
             console.error("검색 실패:", error);
@@ -38,7 +36,6 @@ export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusi
 
   const handleAddTrack=async (trackId:string,trackName:string,artist:string,albumArt:string,trackUri:string)=>{
      const {track,isDuplicate} = await playlistService.addTrack(roomId,trackId,trackName,artist,albumArt,trackUri);
-     console.log(track.tracks,"핸들 애드 트랙,");
      if(track && !isDuplicate){
        onMusicAdded(track);
      }
@@ -49,17 +46,7 @@ export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusi
       <div className="p-6 flex flex-col h-full bg-transparnet">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-foreground">노래 검색하기</h2>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => setTab('PLAYLIST')} 
-            className="text-muted-foreground hover:text-white"
-          >
-            ✕
-          </Button>
         </div>
-    
-
 
       <div className="relative mb-8">
         <input

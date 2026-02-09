@@ -52,7 +52,6 @@ export const chatService={
             }
             )
             .subscribe((status)=>{
-                console.log("현재 구독 상태",status);
                if (status === 'CHANNEL_ERROR') {
                     console.error("❌ 구독 에러 발생! RLS 정책이나 프로젝트 설정을 확인하세요.");
                 }

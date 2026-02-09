@@ -89,7 +89,6 @@ export const playlistService= {
 
 // 곡 상태 업데이트
  async updateStatus(roomId: string,id:UUID, status: 'waiting' | 'playing' | 'finished') {
-  console.log("이거 실행여부 확인");
     const { error } = await supabase
       .from('playlist')
       .update({ status:status })
@@ -103,7 +102,6 @@ export const playlistService= {
   },
 //  투표 1위 곡 가져오기 (다음 곡 선정을 위해)
   async getTopVotedTrack(roomId: string) {
-    console.log("실행 확인");
       const {data:nextTrack,error} =await supabase
         .from('playlist')
         .select(`*,
@@ -119,7 +117,6 @@ export const playlistService= {
         .limit(1)
         .maybeSingle();
         if(error || !nextTrack){
-          console.log("대기열에 다음 곡이 없습니다.");
           return;
         }
         console.log(nextTrack,"nextTrack");
@@ -133,7 +130,6 @@ export const playlistService= {
       p_room_id:roomId,
       p_user_id:userId
      })
-     console.log(data,"곡 추가시 데이터 값");
      if(error) {console.log(error.message,"곡 업데이트 오류")
       return error;
      };

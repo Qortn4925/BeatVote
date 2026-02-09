@@ -6,7 +6,7 @@ export const roomService= {
     async getRoomInfo(roomCode:string){
         const {data,error}=await supabase
         .from('rooms')
-        .select('id,host_id')
+        .select('id,host_id,title')
         .eq('room_code',roomCode)
         .single();
         return data;

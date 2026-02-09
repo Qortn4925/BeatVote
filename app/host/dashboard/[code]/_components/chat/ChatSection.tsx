@@ -11,21 +11,21 @@ import { PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, Popove
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 
 
-export default function ChatSection({roomId,userId,nickName,isHost}:{ roomId:string,userId:string,nickName:string,isHost:boolean}) {
+export default function ChatSection({roomId,userId,nickName,isHost ,title}:{ roomId:string,userId:string,nickName:string,isHost:boolean , title:string}) {
         
     const[messageList,setMessageList]=useState<any[]>([]);
     const currentUserId=userId;
     const currentNickName=nickName;
     
     const handleSendMessage= async(text:string) =>{
-        
+        const now = new Date();
         const tempMessage={
             id:crypto.randomUUID(),
             message:text,
             user_nickname:currentNickName,
             user_id:currentUserId,
             is_host:isHost,
-            created_at:new Date().toISOString
+            created_at: now.toISOString()
         }
 
         chatService.sendMessage(tempMessage.id,text,roomId,currentUserId,nickName,isHost);
@@ -60,14 +60,11 @@ export default function ChatSection({roomId,userId,nickName,isHost}:{ roomId:str
         }
     },[roomId])
     
-
     return (
    <div className="flex flex-col h-full w-full border border-border bg-transparent rounded-lg shadow-sm overflow-hidden">
-  
-  
     <header className="h-14 flex-none border-b border-border flex items-center justify-between px-6 bg-card/50 backdrop-blur-md">
        <span className="font-bold text-foreground">
-        방 제목
+        {title}
         </span>
         <ShareMenu />
     </header>

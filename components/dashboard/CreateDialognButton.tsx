@@ -36,7 +36,7 @@ const handleSubmit =async (e: React.FormEvent) => {
     <Dialog open={open} onOpenChange={setOpen}>
       
         <DialogTrigger asChild>
-          <Button variant="outline">Open Dialog</Button>
+          <Button variant="outline">방 만들기</Button>
         </DialogTrigger>
   
         <DialogContent className="sm:max-w-[425px]">

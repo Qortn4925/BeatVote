@@ -16,10 +16,7 @@ export default function PlayList({playList,myVotes , onVoted}:PlayListProps) {
 
 
     return <div className="flex flex-col h-full space-y-4">
-      {/* <div className="flex items-center justify-between px-2">
-        <h3 className="text-sm font-semibold text-muted-foreground">투표 리스트</h3>
-        <Badge variant="secondary">{playList.length} Tracks</Badge>
-      </div> */}
+    
       <PlayListHeader count={playList.length}/>
 
       <ScrollArea className="flex-1 pr-4">
@@ -46,16 +43,6 @@ function PlayListHeader({count}:{count:number}) {
         <h3 className="text-sm font-semibold text-muted-foreground">투표 리스트</h3>
         <Badge variant="secondary">{count} Tracks</Badge>
       </div>
-      
-      {/* 검색 탭으로 이동하는 버튼 (추가 예정인 기능) */}
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={() => setTab('SEARCH')}
-        className="gap-2"
-      >
-        곡 추가하기
-      </Button>
     </div>
   );
 };

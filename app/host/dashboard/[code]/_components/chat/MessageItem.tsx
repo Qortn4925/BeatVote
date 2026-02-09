@@ -14,7 +14,16 @@ interface MessageItemProps {
     isMine:boolean
 }
 
+
 export default function MessageItem({message, isMine}:MessageItemProps){
+
+  const formatTime=(at:number)=>{
+    if(!at) return;
+    const date = new Date(at);
+    if(isNaN(date.getTime())) return "시간오류";
+    return date.toLocaleTimeString('ko-Kr',{ hour: '2-digit', minute: '2-digit' });
+  }
+
     return (<div
             key={message.id}
             className={`flex flex-col ${isMine ? "items-end" : "items-start"}`}
@@ -34,10 +43,9 @@ export default function MessageItem({message, isMine}:MessageItemProps){
             >
               {message.message}
             </div>
-
             {/* 시간 표시 (선택사항) */}
             <span className="text-[10px] text-slate-400 mt-1 px-1">
-              {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              {formatTime(message.created_at)}
             </span>
           </div>
     );
