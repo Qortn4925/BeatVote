@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Pause, Play } from "lucide-react";
+import { Music, Pause, Play, PlusCircle } from "lucide-react";
 
 interface TrackMaster{
     id:string;
@@ -32,10 +32,29 @@ interface CurrentTrackProps {
         return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
          };
          const progress=duration>0?(position/duration)*100:0;
-    if(!displayTrack) {
-        return <div> 재생중인곡 x</div>
-    }
+  if (!displayTrack) {
+    return (
+      <Card className="overflow-hidden border border-dashed border-muted-foreground/20 bg-muted/5 shadow-sm">
+        <CardContent className="p-8">
+          <div className="flex flex-col items-center justify-center space-y-6 opacity-60">
+          
+            <div className="flex h-40 w-40 items-center justify-center rounded-2xl bg-muted/20 backdrop-blur-sm">
+              <Music className="h-16 w-16 text-muted-foreground/40 animate-pulse" />
+            </div>
 
+            <div className="w-full text-center space-y-2">
+              <h2 className="text-lg font-semibold text-muted-foreground">대기 중인 곡이 없습니다</h2>
+              <p className="text-sm text-muted-foreground/70">
+                곡 검색 탭에서 노래를 추가하고<br />함께 음악을 즐겨보세요!
+              </p>
+            </div>
+
+           
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 return  (<Card className="overflow-hidden border-none bg-gradient-to-br from-secondary/40 to-background shadow-lg">
                 <CardContent className="p-4">
                             {/* 앨범 아트 */}

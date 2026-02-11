@@ -3,6 +3,7 @@ import { Button } from "../ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { PlusCircle } from "lucide-react";
 
 interface CreateDialogButtonProps{
   onCreatRoom:(description:string,genre:string,title:string)=>void
@@ -36,7 +37,7 @@ const handleSubmit =async (e: React.FormEvent) => {
     <Dialog open={open} onOpenChange={setOpen}>
       
         <DialogTrigger asChild>
-          <Button variant="outline">방 만들기</Button>
+          <Button variant="outline"><PlusCircle/></Button>
         </DialogTrigger>
   
         <DialogContent className="sm:max-w-[425px]">
