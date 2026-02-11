@@ -49,7 +49,7 @@ function LoginForm(){
           access_type: 'offline',
           prompt: 'consent',
         },
-        redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/host/dashboard`,
+        redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/explore`,
       },
     });
   };
