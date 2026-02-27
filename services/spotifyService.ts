@@ -2,38 +2,46 @@
 
 import { spotifyTokenManager } from "@/lib/spotify/spotifyTokenManager";
 
-spotifyTokenManager
+
 const BASE_URL="https://api.spotify.com/v1/"
 
+// 1. 공용 토큰을 가져오는 함수는 완전히 분리합니다. (아까 우리가 TDD로 기획했던 그 녀석)
+const getAppToken = async () => {
+  // 여기서 Redis 캐시를 확인하고, 없으면 accounts.spotify.com 에 POST 요청을 보내서
+  // 토큰을 받아오고 Redis에 저장하는 로직이 들어갑니다.
+  // (이건 spotifyFetch를 쓰지 않고 순수 fetch를 씁니다)
+  return "발급받거나_캐시된_공용토큰"; 
+};
 
-// 내부에서만 쓸 헬퍼 함수 (객체 밖으로 빼서 재사용성을 높임)
-const spotifyFetch = async (endpoint: string, options: RequestInit = {}) => {
-  // 1. 매니저에게 유효한 토큰을 달라고 함 (만료됐으면 알아서 갱신해옴)
-  const token = await spotifyTokenManager.getToken();
+// 2. spotifyFetch에 옵션(isPublic)을 추가합니다.
+interface SpotifyFetchOptions extends RequestInit {
+  isPublic?: boolean; // 이 값이 true면 공용(앱) 토큰을 사용!
+}
 
-  // 2. 요청 전송
+const spotifyFetch = async (endpoint: string, options: SpotifyFetchOptions = {}) => {
+  // 핵심: isPublic 옵션에 따라 매니저에게 물어볼지, Redis 공용 토큰을 쓸지 결정
+  const token = options.isPublic 
+    ? await getAppToken() 
+    : await spotifyTokenManager.getToken();
+
+  const BASE_URL = 'https://api.spotify.com/v1/';
+  
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,
     headers: {
       ...options.headers,
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token}`, // 공용이든 개인이든 어차피 Bearer 형식은 똑같음!
       'Content-Type': 'application/json',
     },
   });
 
-  // 3. 에러 처리
   if (!res.ok) {
-    // Spotify는 에러 내용을 body에 담아줄 때가 많음
     const errorBody = await res.json().catch(() => ({})); 
     console.error("Spotify API Error Detail:", errorBody);
     throw new Error(`Spotify API Error: ${res.status} ${res.statusText}`);
   }
 
-  // 4. 응답 처리 
-  if (res.status === 204) {
-    return null;
-  }
-
+  if (res.status === 204) return null;
   return res.json();
 };
 
@@ -79,4 +87,12 @@ export const spotifyService = {
       }),
     });
   },
+  // 
+  async search(query: string) {
+    return spotifyFetch(`search?q=${encodeURIComponent(query)}&type=track&limit=5`, {
+      method: 'GET',
+      isPublic: true, // 💡 핵심: "이건 공용 토큰 써줘!" 라고 명시
+    });
+  }
+
 };

@@ -28,8 +28,8 @@ class SpotifyTokenManager {
 
   //   토큰 갱신 함수
   public async getToken(): Promise<string> {
-    // 1. 메모리에 유효한 토큰이 있으면 바로 반환 (가장 빠름)
-    if (this.accessToken && Date.now() < this.tokenExpiresAt - 60000) { // 만료 1분 전까지는 안전하다고 판단
+    // 1. 메모리에 유효한 토큰이 있으면 바로 반환 
+    if (this.accessToken && Date.now() < this.tokenExpiresAt - 60000) { 
       return this.accessToken;
     }
 
@@ -37,27 +37,18 @@ class SpotifyTokenManager {
     return this.ensureValidToken();
   }
 
-  // 🔒 토큰 갱신 (Promise Locking 적용)
   private async ensureValidToken(): Promise<string> {
-    // 이미 누군가 갱신을 하고 있다면? 그 녀석이 끝날 때까지 기다렸다가 결과만 받음 (중복 호출 방지)
     if (this.refreshPromise) {
       return this.refreshPromise;
     }
 
-    // 아무도 갱신 안 하고 있다면? 내가 총대 메고 갱신 시작
     this.refreshPromise = (async () => {
       try {
-        console.log(" 토큰 갱신 프로세스 시작...");
-        
-        // Supabase 세션 갱신 (이게 돌면 provider_token도 바뀜)
+        // Supabase 세션 갱신
         const { data: { session }, error } = await this.supabase.auth.getSession();
-          console.log(session," 세션값 확인");
-          console.log(error,"에러 값 확인ㄴ");
-          console.log(session?.provider_token,"값");
         if (error || !session?.provider_token) {
           throw new Error("토큰 갱신 실패: 다시 로그인해주세요.");
         }
-
         // 상태 업데이트
         this.accessToken = session.provider_token;
         // expires_at은 초 단위이므로 ms로 변환
@@ -70,7 +61,6 @@ class SpotifyTokenManager {
         this.refreshPromise = null;
       }
     })();
-
     return this.refreshPromise;
   }
 }

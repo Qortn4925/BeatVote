@@ -1,4 +1,4 @@
-'use client'; // ✅ 오타 수정
+'use client'; 
 
 import { useEffect, useState } from "react";
 import { spotifyService } from "@/services/spotifyService";
@@ -11,7 +11,6 @@ declare global {
     }
 }
 
-// ✅ Props에서 token 제거! (이제 필요 없음)
 interface UseSpotifyPlayerProps {
     setPosition: (pos: number) => void;
     setDuration: (dur: number) => void;

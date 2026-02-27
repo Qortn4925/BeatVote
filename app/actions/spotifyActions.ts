@@ -1,5 +1,7 @@
 'use server'
 
+import { redis } from "@/lib/redis";
+
 export async function searchSpotify(query: string) {
   if (!query) return [];
 
@@ -7,11 +9,9 @@ export async function searchSpotify(query: string) {
 
     const client_id = process.env.NEXT_PUBLIC_CLIENT_ID;
     const client_secret = process.env.NEXT_PUBLIC_CLIENT_SECRET; 
+    const cacheKey = `spotify:search:${query}`;
 
    if (!client_id || !client_secret) {
-      console.error("❌ 환경변수가 없습니다. .env.local 파일을 확인하고 서버를 재시작하세요.");
-      console.log("ID:", client_id);
-      console.log("Secret:", client_secret ? "있음(가림)" : "없음");
       return [];
     }
 
@@ -31,6 +31,11 @@ export async function searchSpotify(query: string) {
     
     const authData = await authRes.json();
     const token = authData.access_token;
+     const redisResult=redis.get(cacheKey);
+
+     if(redisResult===null) {
+      
+     }
     // 3. 검색 요청
     const searchRes = await fetch(
       `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=5`,
@@ -54,7 +59,6 @@ export async function searchSpotify(query: string) {
       return [];
     }
 
-    
     // 4. 결과 반환 (필요한 데이터만 추려서)
       return data.tracks.items.map((item: any) => ({
       id: item.id,

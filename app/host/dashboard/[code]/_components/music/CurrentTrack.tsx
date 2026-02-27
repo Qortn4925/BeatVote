@@ -48,8 +48,6 @@ interface CurrentTrackProps {
                 곡 검색 탭에서 노래를 추가하고<br />함께 음악을 즐겨보세요!
               </p>
             </div>
-
-           
           </div>
         </CardContent>
       </Card>
