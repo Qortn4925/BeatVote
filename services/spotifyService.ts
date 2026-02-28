@@ -1,25 +1,40 @@
-"use client"
+
 
 import { spotifyTokenManager } from "@/lib/spotify/spotifyTokenManager";
-
+import { redis } from '../lib/redis';
 
 const BASE_URL="https://api.spotify.com/v1/"
 
-// 1. 공용 토큰을 가져오는 함수는 완전히 분리합니다. (아까 우리가 TDD로 기획했던 그 녀석)
-const getAppToken = async () => {
-  // 여기서 Redis 캐시를 확인하고, 없으면 accounts.spotify.com 에 POST 요청을 보내서
-  // 토큰을 받아오고 Redis에 저장하는 로직이 들어갑니다.
-  // (이건 spotifyFetch를 쓰지 않고 순수 fetch를 씁니다)
-  return "발급받거나_캐시된_공용토큰"; 
-};
+// 공용 토큰
+async function getAppToken(): Promise<string> {
+  const CACHE_KEY = 'spotify:app_token';
+  const cached = await redis.get<string>(CACHE_KEY);
+  
+  const client_id = process.env.NEXT_PUBLIC_CLIENT_ID;
+  const client_secret = process.env.NEXT_PUBLIC_CLIENT_SECRET; 
+  if (cached) return cached;
 
+  const authRes = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Authorization: 'Basic ' + Buffer.from(`${client_id}:${client_secret}`).toString('base64'),
+    },
+    body: 'grant_type=client_credentials',
+  });
+
+  if (!authRes.ok) throw new Error("공용 토큰 발급 실패");
+  const data = await authRes.json();
+  
+  await redis.set(CACHE_KEY, data.access_token, { ex: 3500 });
+  return data.access_token;
+}
 // 2. spotifyFetch에 옵션(isPublic)을 추가합니다.
 interface SpotifyFetchOptions extends RequestInit {
   isPublic?: boolean; // 이 값이 true면 공용(앱) 토큰을 사용!
 }
 
 const spotifyFetch = async (endpoint: string, options: SpotifyFetchOptions = {}) => {
-  // 핵심: isPublic 옵션에 따라 매니저에게 물어볼지, Redis 공용 토큰을 쓸지 결정
   const token = options.isPublic 
     ? await getAppToken() 
     : await spotifyTokenManager.getToken();
@@ -30,7 +45,7 @@ const spotifyFetch = async (endpoint: string, options: SpotifyFetchOptions = {})
     ...options,
     headers: {
       ...options.headers,
-      Authorization: `Bearer ${token}`, // 공용이든 개인이든 어차피 Bearer 형식은 똑같음!
+      Authorization: `Bearer ${token}`, 
       'Content-Type': 'application/json',
     },
   });
@@ -46,7 +61,7 @@ const spotifyFetch = async (endpoint: string, options: SpotifyFetchOptions = {})
 };
 
 export const spotifyService = {
-  // 필요하면 외부에서도 raw fetch를 쓸 수 있게 노출
+ 
   fetch: spotifyFetch,
 
   async play(deviceId: string, trackUri: string) {
@@ -77,7 +92,7 @@ export const spotifyService = {
     }
   },
 
-  // 
+   
   async transferPlayback(deviceId: string) {
     return spotifyFetch('/me/player', {
       method: 'PUT',
@@ -87,12 +102,37 @@ export const spotifyService = {
       }),
     });
   },
-  // 
+ 
   async search(query: string) {
-    return spotifyFetch(`search?q=${encodeURIComponent(query)}&type=track&limit=5`, {
-      method: 'GET',
-      isPublic: true, // 💡 핵심: "이건 공용 토큰 써줘!" 라고 명시
-    });
-  }
+    if (!query) return [];
+    const CACHE_KEY = `spotify:search:${query}`;
 
+    try {
+      const cachedSearch = await redis.get<any[]>(CACHE_KEY);
+    
+      if (cachedSearch) {
+        return cachedSearch;
+      }
+
+      const data = await spotifyFetch(`search?q=${encodeURIComponent(query)}&type=track&limit=5`, {
+        method: 'GET',
+        isPublic: true, 
+      });
+
+      const mappedResults = data.tracks.items.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        artist: item.artists[0]?.name || 'Unknown Artist',
+        albumArt: item.album.images[0]?.url || '',
+        uri: item.uri,
+      }));
+
+      await redis.set(CACHE_KEY, mappedResults, { ex: 3600 });
+      return mappedResults;
+
+    } catch (error) {
+      console.error("Spotify Search Error:", error);
+      return [];
+    }
+  }
 };

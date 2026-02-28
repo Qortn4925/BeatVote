@@ -1,10 +1,7 @@
 'use client';
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
 import { playlistService } from "@/services/playlistService";
-import { useTabStore } from "@/app/store/useTabStore";
 import { Button } from "@/components/ui/button";
-import { spotifyService } from "@/services/spotifyService";
 import { searchSpotify } from "@/app/actions/spotifyActions";
 
 export default function SearchBar({roomId,onMusicAdded}:{ roomId: string, onMusicAdded:(track:any) => void} ) {
